@@ -1,0 +1,66 @@
+   #region EmailSender
+
+                var uploadFolderPath = Path.Combine(host.WebRootPath, "templates/email-template");
+                if (Directory.Exists(uploadFolderPath))
+                    Directory.CreateDirectory(uploadFolderPath);
+
+                var fileName = "Confirm_Account_Registration.html"; //Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadFolderPath, fileName);
+
+                var builder = new BodyBuilder();
+
+                using (StreamReader SourceReader = System.IO.File.OpenText(filePath))
+                {
+                    builder.HtmlBody = SourceReader.ReadToEnd();
+                }
+
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+
+                // Send Email Address
+                var subject = "SIDIMSLite Account Creation";
+                var Email = user.Email;
+                var Password = randomPassword;
+                var Message = "Messaage End";
+                var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId=" + user.Id + "&code=" + code;
+
+                //var callbackUrl = new Uri(Url.Link("ConfirmEmailRoute", new { userId = user.Id, code = code }));
+                // Url.Page("/Account/ConfirmEmail"
+                var callbackUrl2 = Url.Page("/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { userId = user.Id, code = code },
+                        protocol: Request.Scheme);
+
+                string messageBody = string.Format(builder.HtmlBody,
+                       subject,
+                       String.Format("{0:dddd, d MMMM yyyy}", DateTime.Now),
+                       Email, //user.FirstName + " " + user.LastName,
+                       user.UserName,
+                       Password,
+                       Message,
+                       callbackUrl,
+                       user.FirstName + " " + user.LastName
+                       );
+
+                /////////////////////////
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    Subject = subject,
+                    IsBodyHtml = true,
+                    Body = messageBody
+                };
+
+                mailMessage.To.Add(Email);
+
+                var smtpClient = new SmtpClient
+                {
+                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Host = "smtp.secureidltd.com",
+                    Port = 587
+                };
+
+                smtpClient.Send(mailMessage);
+
+                #endregion
