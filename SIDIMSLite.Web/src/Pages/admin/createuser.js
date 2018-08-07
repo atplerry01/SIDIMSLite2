@@ -1,8 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
+import Validator from "validator";
+import toastr from "toastr";
+
 import { lookupDropDown } from "../../_selector/selectors";
 import SelectInput from "../../Components/common/SelectInput";
-import toastr from "toastr";
+import InlineError from "../../Components/common/InlineError";
 
 class CreateUser extends Component {
   state = {
@@ -14,7 +17,8 @@ class CreateUser extends Component {
     clientId: "",
     username: "",
     password: "",
-    sidClients: ""
+    sidClients: "",
+    errors: {}
   };
 
   componentWillMount() {
@@ -26,38 +30,50 @@ class CreateUser extends Component {
     this.setState({ [name]: value });
   };
 
+  validateEmail = email => {
+    const errors = {};
+    if (!Validator.isEmail(email)) errors.email = "Invalid email";
+    return errors;
+  };
+
   handleUserCreation = e => {
     e.preventDefault();
-    const {
-      username,
-      password,
-      email,
-      clientId,
-      phoneNumber,
-      firstName,
-      lastName
-    } = this.state;
 
-    var userAccount = {
-      username: username,
-      password: password,
-      email: email,
-      phoneNumber: phoneNumber,
-      sidClientId: clientId,
-      firstName: firstName,
-      lastName: lastName
-    };
+    const errors = this.validateEmail(this.state.email);
+    this.setState({ errors });
 
-    axios
-      .post("https://localhost:5001/api/account/client/create", userAccount)
-      .then(response => {
-        console.log(response.data);
-        toastr.success("Creation Successful.", "Account Creation");
-        this.props.history.push("/admin");
-      })
-      .catch(function(error) {
-        toastr.error("Creation Failed", "Account Creation");
-      });
+    if (Object.keys(errors).length === 0) {
+      const {
+        username,
+        password,
+        email,
+        clientId,
+        phoneNumber,
+        firstName,
+        lastName
+      } = this.state;
+
+      var userAccount = {
+        username: username,
+        password: password,
+        email: email,
+        phoneNumber: phoneNumber,
+        sidClientId: clientId,
+        firstName: firstName,
+        lastName: lastName
+      };
+
+      axios
+        .post("https://localhost:5001/api/account/client/create", userAccount)
+        .then(response => {
+          console.log(response.data);
+          toastr.success("Creation Successful.", "Account Creation");
+          this.props.history.push("/admin");
+        })
+        .catch(function(error) {
+          toastr.error("Creation Failed", "Account Creation");
+        });
+    }
   };
 
   getAllClients = () => {
@@ -79,7 +95,8 @@ class CreateUser extends Component {
       password,
       phoneNumber,
       sidClients,
-      clientId
+      clientId,
+      errors
     } = this.state;
     const clients = lookupDropDown(sidClients);
 
@@ -143,7 +160,9 @@ class CreateUser extends Component {
                   onChange={this.handleChange}
                   className="form-control"
                   placeholder="Email Address"
-                />
+                  required
+                />{" "}
+                {errors.email && <InlineError text={errors.email} />}
               </div>
 
               <div className="form-group">

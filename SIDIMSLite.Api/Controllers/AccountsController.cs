@@ -255,6 +255,7 @@ namespace SIDIMSLite.Api.Controllers
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
             var result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
+            //var result2 = await userManager.ChangePasswordAsync(user);
 
             if (result.Succeeded)
             {

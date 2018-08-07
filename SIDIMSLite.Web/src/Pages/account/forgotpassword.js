@@ -1,10 +1,13 @@
 import React, { Component } from "react";
 import toastr from "toastr";
 import axios from "axios";
+import Validator from "validator";
+import InlineError from "../../Components/common/InlineError";
 
 class ForgotPassword extends Component {
   state = {
-    email: ""
+    email: "",
+    errors: {}
   };
 
   handleChange = e => {
@@ -12,29 +15,41 @@ class ForgotPassword extends Component {
     this.setState({ [name]: value });
   };
 
+  validate = email => {
+    const errors = {};
+    if (!Validator.isEmail(email)) errors.email = "Invalid email";
+
+    return errors;
+  };
+
   handleSubmit = e => {
     e.preventDefault();
 
     const { email } = this.state;
 
-    var userData = {
-      email: email
-    };
+    const errors = this.validate(email);
+    this.setState({ errors });
 
-    axios
-      .post("https://localhost:5001/api/account/ForgotPassword", userData)
-      .then(response => {
-        console.log(response.data);
-        toastr.success("Email Sent Successful.", "Password Reset");
-        this.props.history.push("/login");
-      })
-      .catch(function(error) {
-        toastr.error("Reset Failed", "Password Reset");
-      });
+    if (Object.keys(errors).length === 0) {
+      var userData = {
+        email: email
+      };
+
+      axios
+        .post("https://localhost:5001/api/account/ForgotPassword", userData)
+        .then(response => {
+          console.log(response.data);
+          toastr.success("Email Sent Successful.", "Password Reset");
+          this.props.history.push("/login");
+        })
+        .catch(function(error) {
+          toastr.error("Reset Failed", "Password Reset");
+        });
+    }
   };
 
   render() {
-    const { email } = this.state;
+    const { email, errors } = this.state;
 
     return (
       <div className="row">
@@ -57,6 +72,7 @@ class ForgotPassword extends Component {
                   className="form-control"
                   placeholder="Enter Email"
                 />
+                {errors.email && <InlineError text={errors.email} />}
               </div>
 
               <input type="submit" value="Submit" onClick={this.handleSubmit} />

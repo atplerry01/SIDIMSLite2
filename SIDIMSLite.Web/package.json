@@ -27,7 +27,8 @@
     "react-scripts": "1.1.4",
     "react-select": "^1.2.1",
     "react-to-print": "^1.0.21",
-    "toastr": "^2.1.4"
+    "toastr": "^2.1.4",
+    "validator": "^10.5.0"
   },
   "scripts": {
     "start": "react-scripts start",

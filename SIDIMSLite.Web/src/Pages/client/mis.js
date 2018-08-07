@@ -36,7 +36,6 @@ class ClientMIS extends Component {
 
       this.getClients(jwtToken.sidClientId);
       this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
-      //this.getClientProducts(jwtToken.sidClientId);
     } else {
       localStorage.removeItem("wss.auth");
       window.location.reload();
@@ -89,9 +88,6 @@ class ClientMIS extends Component {
     var start = moment(startDate._d).format("L");
     var end = moment(endDate._d).format("L");
 
-    console.log(start);
-    console.log(end);
-
     if (clientVaults) {
       filteredStocks = clientVaults.filter(entity => {
         return entity.product.toLowerCase().indexOf(this.state.search) !== -1;
@@ -142,7 +138,7 @@ class ClientMIS extends Component {
 
                       <div className="col-lg-4 pull-left">
                         <h2 style={{ fontSize: 18 }}>
-                          Report between {start} - {end}
+                          <strong>Report:</strong> {start} - {end}
                         </h2>
                       </div>
                       <div className="col-lg-4 pull-right">

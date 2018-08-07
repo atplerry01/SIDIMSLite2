@@ -148,15 +148,20 @@ class Inventory extends Component {
     }
 
     const stockSummaryDiv = () => {
+      const { startDate, endDate } = this.state;
+
+      var start = moment(startDate._d).format("L");
+      var end = moment(endDate._d).format("L");
+
+      console.log(start, end);
+
       if (stockSummary) {
         return (
           <div>
             <h3>Summary</h3>
             <div>Current Stock: {stockSummary.currentStock}</div>
             <div>
-              Total Consumption: {stockSummary.stockCount} ({
-                stockSummary.filter
-              })
+              Total Consumption: {stockSummary.stockCount} ({start} - {end})
             </div>
           </div>
         );
@@ -188,7 +193,7 @@ class Inventory extends Component {
               <td>{stock.closingBalance}</td>
               <td>
                 <span style={{ fontSize: "8" }}>
-                  {moment(stock.date).format("D/M/YY, LT")}
+                  {moment(stock.date).format("DD-MMM-YYYY")}
                 </span>
               </td>
             </tr>
@@ -324,9 +329,11 @@ class Inventory extends Component {
                         </div>
                       </div>
 
+                      {/*
                       <div className="col-lg-4 pull-right">
                         <a onClick={this.onLastMonthFilter}>Last Month</a>
                       </div>
+                        */}
                     </div>
 
                     <table className="table table-sm" id="table-to-xls">
