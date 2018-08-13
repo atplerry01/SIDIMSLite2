@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SIDIMSLite.Api.Configuration;
 using SIDIMSLite.Api.Models;
 using SIDIMSLite.Api.Models.Account;
 using SIDIMSLite.Api.Persistence;
@@ -54,6 +55,27 @@ namespace SIDIMSLite.Api
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            // services.Configure<IdentityOptions>(options =>
+            //   {
+            //       // Password settings
+            //       options.Password.RequireDigit = true;
+            //       options.Password.RequiredLength = 8;
+            //       options.Password.RequireNonAlphanumeric = false;
+            //       options.Password.RequireUppercase = true;
+            //       options.Password.RequireLowercase = false;
+            //       options.Password.RequiredUniqueChars = 6;
+
+            //       // Lockout settings
+            //       options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+            //       options.Lockout.MaxFailedAccessAttempts = 10;
+            //       options.Lockout.AllowedForNewUsers = true;
+
+            //       // User settings
+            //       options.User.RequireUniqueEmail = true;
+            //   });
+
+
+
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
@@ -70,6 +92,8 @@ namespace SIDIMSLite.Api
                 app.UseHsts();
             }
 
+            //app.UseAuthentication();
+            app.UseMiddleware<ExceptionMiddleware>();
 
             // global cors policy
             app.UseCors(x => x

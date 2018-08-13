@@ -72,7 +72,7 @@ class Header extends Component {
                           {this.state.fullName}
                         </div>
                         <div style={{ fontSize: "10px" }}>
-                          ({jwtToken.clientName})
+                          {jwtToken.clientName}
                         </div>
                       </a>
                     </div>

@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import ReactToExcel from "react-html-table-to-excel";
 import ExampleCustomInput from "../../Components/calender/ExampleCustomInput";
+import { myConfig } from "../../App/config";
 
 class ClientMIS extends Component {
   constructor(props, context) {
@@ -38,8 +39,8 @@ class ClientMIS extends Component {
       this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
     } else {
       localStorage.removeItem("wss.auth");
-      window.location.reload();
-      this.props.history.push("/login");
+      //window.location.reload();
+      //this.props.history.push("/login");
     }
   }
 
@@ -136,11 +137,13 @@ class ClientMIS extends Component {
                         buttonText="Export to Excel"
                       />
 
+                      {/*
                       <div className="col-lg-4 pull-left">
                         <h2 style={{ fontSize: 18 }}>
                           <strong>Report:</strong> {start} - {end}
                         </h2>
                       </div>
+                      */}
                       <div className="col-lg-4 pull-right">
                         <div className="row">
                           <div className="col-lg-4">
@@ -192,10 +195,10 @@ class ClientMIS extends Component {
                           <th scope="col">SN</th>
                           <th scope="col">Description</th>
                           <th scope="col">Opening Stock</th>
-                          <th>Addition</th>
+                          <th>New Stock</th>
                           <th>Waste</th>
-                          <th>Consumption</th>
-                          <th scope="col">Current Stock</th>
+                          <th>Personalization</th>
+                          <th scope="col">Closing Stock</th>
                           <th>Last Updated</th>
                         </tr>
                       </thead>
@@ -213,7 +216,7 @@ class ClientMIS extends Component {
 
   getClients(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId)
+      .get(myConfig.apiUrl + "/api/clients/" + clientId)
       .then(response => {
         this.setState({ client: response.data });
       })
@@ -222,7 +225,7 @@ class ClientMIS extends Component {
 
   getClientProducts(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId + "/products")
+      .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products")
       .then(response => {
         this.setState({ products: response.data });
       })
@@ -232,7 +235,8 @@ class ClientMIS extends Component {
   getClientVaults(clientId, rangeType, startDate, endDate) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
+        myConfig.apiUrl +
+          "/api/clients/" +
           clientId +
           "/ProductStockSummary?rangeType=" +
           rangeType +
@@ -250,9 +254,7 @@ class ClientMIS extends Component {
   getProductStockList(clientId, productId) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
-          clientId +
-          "/ProductStockSummary"
+        myConfig.apiUrl + "/api/clients/" + clientId + "/ProductStockSummary"
       )
       .then(response => {
         console.log(response.data);
@@ -263,7 +265,7 @@ class ClientMIS extends Component {
 
   // getProductStockList(clientId, productId) {
   //   axios
-  //     .get("https://localhost:5001/api/clients/" + clientId + "/products/" + productId + "/stocklists")
+  //     .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products/" + productId + "/stocklists")
   //     .then(response => {
   //       this.setState({ stockReports: response.data });
   //     })

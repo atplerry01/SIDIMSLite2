@@ -19,3 +19,11 @@ ReactDOM.render(
 );
 
 registerServiceWorker();
+
+{
+  /*
+  <Router history={history}>
+    <Route component={App} />
+  </Router>
+  */
+}

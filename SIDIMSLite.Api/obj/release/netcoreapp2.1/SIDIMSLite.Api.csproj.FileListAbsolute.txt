@@ -1,0 +1,15 @@
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\bin\release\netcoreapp2.1\SIDIMSLite.Api.deps.json
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\bin\release\netcoreapp2.1\SIDIMSLite.Api.runtimeconfig.json
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\bin\release\netcoreapp2.1\SIDIMSLite.Api.runtimeconfig.dev.json
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\bin\release\netcoreapp2.1\SIDIMSLite.Api.dll
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\bin\release\netcoreapp2.1\SIDIMSLite.Api.pdb
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.csprojAssemblyReference.cache
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.csproj.CoreCompileInputs.cache
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.RazorAssemblyInfo.cache
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.RazorAssemblyInfo.cs
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\UserSecretsAssemblyInfo.cs
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.AssemblyInfoInputs.cache
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.AssemblyInfo.cs
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.RazorTargetAssemblyInfo.cache
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.dll
+C:\Development\SecureID\VSCode\SIDIMSLite\SIDIMSLite.Api\obj\release\netcoreapp2.1\SIDIMSLite.Api.pdb

@@ -95,10 +95,9 @@ namespace SIDIMSLite.Api.Controllers
             };
 
             String randomPassword = GeneratePassword(3, 3, 3);
+            randomPassword = "SidClient01";
 
-            //randomPassword = "SidClient01";
             var result = await userManager.CreateAsync(user, randomPassword);
-
 
             if (result.Succeeded)
             {
@@ -117,73 +116,73 @@ namespace SIDIMSLite.Api.Controllers
                 context.ClientUsers.Add(userClient);
                 await context.SaveChangesAsync();
 
-                
-            #region EmailSender
 
-            var uploadFolderPath = Path.Combine(host.WebRootPath, "templates/email-template");
-            if (Directory.Exists(uploadFolderPath))
-                Directory.CreateDirectory(uploadFolderPath);
+                #region EmailSender
 
-            var fileName = "Confirm_Account_Registration.html"; //Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadFolderPath, fileName);
+                var uploadFolderPath = Path.Combine(host.WebRootPath, "templates/email-template");
+                if (Directory.Exists(uploadFolderPath))
+                    Directory.CreateDirectory(uploadFolderPath);
 
-            var builder = new BodyBuilder();
+                var fileName = "Confirm_Account_Registration.html"; //Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadFolderPath, fileName);
 
-            using (StreamReader SourceReader = System.IO.File.OpenText(filePath))
-            {
-                builder.HtmlBody = SourceReader.ReadToEnd();
-            }
+                var builder = new BodyBuilder();
 
-            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                using (StreamReader SourceReader = System.IO.File.OpenText(filePath))
+                {
+                    builder.HtmlBody = SourceReader.ReadToEnd();
+                }
+
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
 
-            // Send Email Address
-            var subject = "SIDIMSLite Account Creation";
-            var Email = user.Email;
-            var Password = randomPassword;
-            var Message = "Messaage End";
-            var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId=" + user.Id + "&code=" + code;
+                // Send Email Address
+                var subject = "SIDIMSLite Account Creation";
+                var Email = user.Email;
+                var Password = randomPassword;
+                var Message = "Messaage End";
+                var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId=" + user.Id + "&code=" + code;
 
-            //var callbackUrl = new Uri(Url.Link("ConfirmEmailRoute", new { userId = user.Id, code = code }));
-            // Url.Page("/Account/ConfirmEmail"
-            var callbackUrl2 = Url.Page("/Account/ConfirmEmail",
-                    pageHandler: null,
-                    values: new { userId = user.Id, code = code },
-                    protocol: Request.Scheme);
+                //var callbackUrl = new Uri(Url.Link("ConfirmEmailRoute", new { userId = user.Id, code = code }));
+                // Url.Page("/Account/ConfirmEmail"
+                var callbackUrl2 = Url.Page("/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { userId = user.Id, code = code },
+                        protocol: Request.Scheme);
 
-            string messageBody = string.Format(builder.HtmlBody,
-                   subject,
-                   String.Format("{0:dddd, d MMMM yyyy}", DateTime.Now),
-                   Email, //user.FirstName + " " + user.LastName,
-                   user.UserName,
-                   Password,
-                   Message,
-                   callbackUrl,
-                   user.FirstName + " " + user.LastName
-                   );
+                string messageBody = string.Format(builder.HtmlBody,
+                       subject,
+                       String.Format("{0:dddd, d MMMM yyyy}", DateTime.Now),
+                       Email, //user.FirstName + " " + user.LastName,
+                       user.UserName,
+                       Password,
+                       Message,
+                       callbackUrl,
+                       user.FirstName + " " + user.LastName
+                       );
 
-            /////////////////////////
+                /////////////////////////
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress("lakinsanya@secureidltd.com"),
-                Subject = subject,
-                IsBodyHtml = true,
-                Body = messageBody
-            };
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    Subject = subject,
+                    IsBodyHtml = true,
+                    Body = messageBody
+                };
 
-            mailMessage.To.Add(Email);
+                mailMessage.To.Add(Email);
 
-            var smtpClient = new SmtpClient
-            {
-                Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
-                Host = "smtp.secureidltd.com",
-                Port = 587
-            };
+                var smtpClient = new SmtpClient
+                {
+                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Host = "smtp.secureidltd.com",
+                    Port = 587
+                };
 
-            smtpClient.Send(mailMessage);
+                smtpClient.Send(mailMessage);
 
-            #endregion
+                #endregion
 
             }
             else
@@ -193,6 +192,111 @@ namespace SIDIMSLite.Api.Controllers
 
             return Content("Successful", "text/html");
         }
+
+        [HttpPost("manager/create")]
+        public async Task<IActionResult> CreateManagerUser([FromBody] AccountSaveResource model)
+        {
+
+            var user = new ApplicationUser()
+            {
+                UserName = model.Username,
+                Email = model.Email,
+                EmailConfirmed = true,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber,
+                IsEnabled = true
+            };
+
+            String randomPassword = GeneratePassword(3, 3, 3);
+            randomPassword = "SidClient01";
+
+            var result = await userManager.CreateAsync(user, randomPassword);
+
+            if (result.Succeeded)
+            {
+
+                string[] userRole = new string[] { "Manager" };
+                var assignRoles = await DirectAssignRolesToUser(user.Id, userRole);
+
+                #region EmailSender
+
+                var uploadFolderPath = Path.Combine(host.WebRootPath, "templates/email-template");
+                if (Directory.Exists(uploadFolderPath))
+                    Directory.CreateDirectory(uploadFolderPath);
+
+                var fileName = "Confirm_Account_Registration.html"; //Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadFolderPath, fileName);
+
+                var builder = new BodyBuilder();
+
+                using (StreamReader SourceReader = System.IO.File.OpenText(filePath))
+                {
+                    builder.HtmlBody = SourceReader.ReadToEnd();
+                }
+
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+
+                // Send Email Address
+                var subject = "SIDIMSLite Account Creation";
+                var Email = user.Email;
+                var Password = randomPassword;
+                var Message = "Messaage End";
+                var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId=" + user.Id + "&code=" + code;
+
+                //var callbackUrl = new Uri(Url.Link("ConfirmEmailRoute", new { userId = user.Id, code = code }));
+                // Url.Page("/Account/ConfirmEmail"
+                var callbackUrl2 = Url.Page("/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { userId = user.Id, code = code },
+                        protocol: Request.Scheme);
+
+                string messageBody = string.Format(builder.HtmlBody,
+                       subject,
+                       String.Format("{0:dddd, d MMMM yyyy}", DateTime.Now),
+                       Email, //user.FirstName + " " + user.LastName,
+                       user.UserName,
+                       Password,
+                       Message,
+                       callbackUrl,
+                       user.FirstName + " " + user.LastName
+                       );
+
+                /////////////////////////
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    Subject = subject,
+                    IsBodyHtml = true,
+                    Body = messageBody
+                };
+
+                mailMessage.To.Add(Email);
+
+                var smtpClient = new SmtpClient
+                {
+                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Host = "smtp.secureidltd.com",
+                    Port = 587
+                };
+
+                smtpClient.Send(mailMessage);
+
+                #endregion
+
+            }
+            else
+            {
+                return Content("Failed", "text/html");
+            }
+
+            return Content("Successful", "text/html");
+        }
+
+
+
 
         [HttpPost("client/update")]
         public async Task<IActionResult> UpdateClientUser([FromBody] AccountUpdateResource model)
@@ -232,7 +336,7 @@ namespace SIDIMSLite.Api.Controllers
             if (result.Succeeded)
             {
                 //return Ok();
-                return Content("Suucessful", "text/html");
+                return Content("Sucessful", "text/html");
             }
             else
             {
@@ -241,7 +345,6 @@ namespace SIDIMSLite.Api.Controllers
 
         }
 
-        //[Authorize]
         [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
         {
@@ -252,10 +355,16 @@ namespace SIDIMSLite.Api.Controllers
 
             var user = await userManager.FindByNameAsync(model.UserId);
 
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            // Verify the Old Password
+            var identity = await userManager.CheckPasswordAsync(user, model.OldPassword); //GetClaimsIdentity(user.UserName, model.OldPassword);
 
+            if (identity == false)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
-            //var result2 = await userManager.ChangePasswordAsync(user);
 
             if (result.Succeeded)
             {
@@ -275,6 +384,7 @@ namespace SIDIMSLite.Api.Controllers
             else
             {
                 return Content("Failed", "text/html");
+                //return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError);
             }
 
             //return Ok();
@@ -291,6 +401,7 @@ namespace SIDIMSLite.Api.Controllers
 
             var user = await userManager.FindByEmailAsync(model.Email);
             String randomPassword = GeneratePassword(3, 3, 3);
+            randomPassword = "SidClient@01";
 
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var result = await userManager.ResetPasswordAsync(user, token, randomPassword);
@@ -301,7 +412,10 @@ namespace SIDIMSLite.Api.Controllers
 
             clientUser.ChangePassword = false;
 
-            if (clientUser == null) return NotFound();
+            if (clientUser == null)
+            {
+
+            } //return NotFound();
 
             context.Entry(clientUser).State = EntityState.Modified;
             await context.SaveChangesAsync();
@@ -330,7 +444,7 @@ namespace SIDIMSLite.Api.Controllers
             var Email = user.Email;
             var Password = randomPassword;
             var Message = "Message End";
-            var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId=" ; //+ user.Id + "&code=" + code
+            var callbackUrl = "http://localhost:3000/account/ConfirmEmail?userId="; //+ user.Id + "&code=" + code
 
             // var callbackUrl2 = Url.Page("/Account/ConfirmEmail",
             //         pageHandler: null,
@@ -491,11 +605,22 @@ namespace SIDIMSLite.Api.Controllers
 
             //var u = await userManager.FindByNameAsync("admin");
             var user1 = await userManager.FindByNameAsync("atplerry");
-            await userManager.AddToRolesAsync(user1, new string[] { "Admin", "Client", "Inventory" });
+            await userManager.AddToRolesAsync(user1, new string[] { "Admin", "Client", "Inventory", "Manager" });
 
             return Content("Success", "text/html");
 
         }
+
+
+        [HttpPost("create-manager")]
+        public async Task<IActionResult> CreateManager(AccountSaveResource accountModel)
+        {
+
+            await roleManager.CreateAsync(new IdentityRole { Name = "Manager" });
+            return Content("Success", "text/html");
+
+        }
+
         public async Task<IActionResult> ResetPassword(PasswordResetModel model)
         {
 

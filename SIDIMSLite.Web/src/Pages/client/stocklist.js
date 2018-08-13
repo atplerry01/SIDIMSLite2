@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReactToExcel from "react-html-table-to-excel";
 import { lookupDropDown } from "../../_selector/selectors";
 import ExampleCustomInput from "../../Components/calender/ExampleCustomInput";
+import { myConfig } from "../../App/config";
 
 class Inventory extends Component {
   constructor(props, context) {
@@ -42,7 +43,7 @@ class Inventory extends Component {
 
   handleShow(data) {
     axios
-      .get("https://localhost:5001/api/clients/stocklog/" + data.id)
+      .get(myConfig.apiUrl + "/api/clients/stocklog/" + data.id)
       .then(response => {
         this.setState({ stockLogs: response.data });
       })
@@ -231,7 +232,8 @@ class Inventory extends Component {
                         <div className="topics-list">
                           <h3>
                             <a href="#">
-                              <span className="badge" />Product Lists
+                              <span className="badge" />
+                              Product Lists
                             </a>
                           </h3>
                           <ul>
@@ -385,7 +387,7 @@ class Inventory extends Component {
 
   getProductById(productId) {
     axios
-      .get("https://localhost:5001/api/clients/products/" + productId)
+      .get(myConfig.apiUrl + "/api/clients/products/" + productId)
       .then(response => {
         this.setState({ productName: response.data });
       })
@@ -394,7 +396,7 @@ class Inventory extends Component {
 
   getClientProducts(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId + "/products")
+      .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products")
       .then(response => {
         this.setState({ products: response.data });
       })
@@ -403,7 +405,7 @@ class Inventory extends Component {
 
   getClientVaults(productId) {
     axios
-      .get("https://localhost:5001/api/clients/" + productId + "/vaults")
+      .get(myConfig.apiUrl + "/api/clients/" + productId + "/vaults")
       .then(response => {
         this.setState({ clientVaults: response.data });
       })
@@ -413,7 +415,8 @@ class Inventory extends Component {
   getProductStockList(productId, rangeType, startDate, endDate) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
+        myConfig.apiUrl +
+          "/api/clients/" +
           productId +
           "/stockreports?rangeType=" +
           rangeType +
@@ -432,7 +435,8 @@ class Inventory extends Component {
   getProductStockSummary(productId, rangeType, startDate, endDate) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
+        myConfig.apiUrl +
+          "/api/clients/" +
           productId +
           "/summary?rangeType=" +
           rangeType +

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import toastr from "toastr";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
+import { myConfig } from "../../App/config";
 
 class LoginPage extends Component {
   constructor(props, context) {
@@ -10,7 +11,8 @@ class LoginPage extends Component {
     this.state = {
       username: "",
       password: "",
-      submitted: false
+      submitted: false,
+      errors: {}
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -38,7 +40,7 @@ class LoginPage extends Component {
       data = data + "&client_id=ngAuthApp";
 
       return axios
-        .post("https://localhost:5001/api/token", data, {
+        .post(myConfig.apiUrl + "/api/token", data, {
           headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
         .then(auth => {
@@ -59,12 +61,18 @@ class LoginPage extends Component {
             } else {
               this.props.history.push("/mis");
             }
+          } else if (this.state.page === "Manager") {
+            this.props.history.push("/manager");
           }
 
           window.location.reload();
         })
         .catch(error => {
           toastr.error("Incorrect Username/ Password", "Login Failed");
+          console.log(error);
+          const errors = {};
+          errors.message = "Invalid username/ Password";
+          this.setState({ errors: errors });
           throw error;
         });
     }
@@ -82,13 +90,17 @@ class LoginPage extends Component {
       margin: "40px 0 0 0"
     };
 
-    const { username, password } = this.state;
+    const { username, password, errors } = this.state;
+
+    console.log(errors);
+
     return (
       <div className="row">
         <div className="col-lg-4">
           <header>
             <h2>
-              <span className="icon-pagesx" />Account Login
+              <span className="icon-pagesx" />
+              Account Login
             </h2>
           </header>
 
@@ -116,7 +128,13 @@ class LoginPage extends Component {
                   placeholder="Password"
                 />
               </div>
-
+              <div>
+                {errors.message && (
+                  <span style={{ color: "red", fontSize: 11 }}>
+                    {errors.message}
+                  </span>
+                )}
+              </div>
               <input type="submit" value="Submit" onClick={this.handleSubmit} />
 
               <span className="clearfix" />

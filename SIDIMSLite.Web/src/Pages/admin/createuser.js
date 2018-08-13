@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Validator from "validator";
 import toastr from "toastr";
+import { myConfig } from "../../App/config";
 
 import { lookupDropDown } from "../../_selector/selectors";
 import SelectInput from "../../Components/common/SelectInput";
@@ -64,7 +65,7 @@ class CreateUser extends Component {
       };
 
       axios
-        .post("https://localhost:5001/api/account/client/create", userAccount)
+        .post(myConfig.apiUrl + "/api/account/client/create", userAccount)
         .then(response => {
           console.log(response.data);
           toastr.success("Creation Successful.", "Account Creation");
@@ -78,7 +79,7 @@ class CreateUser extends Component {
 
   getAllClients = () => {
     axios
-      .get("https://localhost:5001/api/clients")
+      .get(myConfig.apiUrl + "/api/clients")
       .then(response => {
         console.log(response.data);
         this.setState({ sidClients: response.data });

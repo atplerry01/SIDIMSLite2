@@ -4,6 +4,7 @@ import axios from "axios";
 import moment from "moment";
 import DatePicker from "react-datepicker";
 import ReactToPrint from "react-to-print";
+import { myConfig } from "../../App/config";
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -44,7 +45,7 @@ class Inventory extends Component {
 
   getClient() {
     axios
-      .get("https://localhost:5001/api/clients")
+      .get(myConfig.apiUrl + "/api/clients")
       .then(response => {
         this.setState({ clients: response.data });
       })
@@ -106,7 +107,7 @@ class Inventory extends Component {
 
   getProductById(productId) {
     axios
-      .get("https://localhost:5001/api/products/" + productId)
+      .get(myConfig.apiUrl + "/api/products/" + productId)
       .then(response => {
         this.setState({ productName: response.data });
       })
@@ -114,7 +115,7 @@ class Inventory extends Component {
   }
   getProduct(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId + "/products")
+      .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products")
       .then(response => {
         this.setState({ products: response.data });
       })
@@ -124,7 +125,8 @@ class Inventory extends Component {
   getProductStockList(productId, rangeType, startDate, endDate) {
     axios
       .get(
-        "https://localhost:5001/api/clients/products/" +
+        myConfig.apiUrl +
+          "/api/clients/products/" +
           productId +
           "/stocklists?rangeType=" +
           rangeType +
@@ -152,10 +154,7 @@ class Inventory extends Component {
       };
 
       axios
-        .post(
-          "https://localhost:5001/api/cardflows/issuance/create",
-          cardIssuance
-        )
+        .post(myConfig.apiUrl + "/api/cardflows/issuance/create", cardIssuance)
         .then(response => {
           this.getProductStockList(productId, "ThisMonth");
         })
@@ -183,7 +182,7 @@ class Inventory extends Component {
 
       axios
         .post(
-          "https://localhost:5001/api/cardflows/cardreceipt/create",
+          myConfig.apiUrl + "/api/cardflows/cardreceipt/create",
           cardReceipt
         )
         .then(response => {
@@ -220,7 +219,7 @@ class Inventory extends Component {
         return (
           <SelectInput
             name="clientId"
-            label=" Clients"
+            label="Clients"
             value={clientId}
             onChange={this.onChange}
             defaultOption="Select Client"

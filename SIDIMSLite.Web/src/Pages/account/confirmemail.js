@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import QueryString from "query-string";
+import QueryString from "../../query-string"; //"query-string";
 import axios from "axios";
+import { myConfig } from "../../App/config";
 
 class ConfirmEmail extends Component {
   state = {};

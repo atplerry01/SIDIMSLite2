@@ -93,6 +93,7 @@ namespace SIDIMSLite.Api.Providers
                 {
                     context.Response.StatusCode = 400;
                     await context.Response.WriteAsync("Invalid username or password.");
+
                     return;
                 }
 

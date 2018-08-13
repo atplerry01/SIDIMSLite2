@@ -3,6 +3,7 @@ import toastr from "toastr";
 import axios from "axios";
 import Validator from "validator";
 import InlineError from "../../Components/common/InlineError";
+import { myConfig } from "../../App/config";
 
 class ForgotPassword extends Component {
   state = {
@@ -56,7 +57,8 @@ class ForgotPassword extends Component {
         <div className="col-lg-4">
           <header>
             <h2>
-              <span className="icon-pagesx" />Forgot Password
+              <span className="icon-pagesx" />
+              Forgot Password
             </h2>
           </header>
 

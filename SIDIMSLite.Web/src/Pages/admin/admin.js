@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import moment from "moment";
 import { NavLink } from "react-router-dom";
+import { myConfig } from "../../App/config";
 
 class Admin extends Component {
   state = {};
@@ -15,8 +16,6 @@ class Admin extends Component {
   };
 
   handleUpdate = user => {
-    console.log(user);
-
     this.props.history.push("/admin/update-user/" + user.userId);
   };
 
@@ -108,7 +107,7 @@ class Admin extends Component {
 
   getClients(clientId) {
     axios
-      .get("https://localhost:5001/api/admin/clientusers")
+      .get(myConfig.apiUrl + "/api/admin/clientusers")
       .then(response => {
         console.log(response.data);
         this.setState({ clientusers: response.data });

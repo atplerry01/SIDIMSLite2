@@ -5,8 +5,11 @@ import DatePicker from "react-datepicker";
 import moment from "moment";
 import ReactToExcel from "react-html-table-to-excel";
 import ExampleCustomInput from "../../Components/calender/ExampleCustomInput";
+import { lookupDropDown } from "../../_selector/selectors";
+import SelectInput from "../../Components/common/SelectInput";
+import { myConfig } from "../../App/config";
 
-class ClientMIS extends Component {
+class ManagerMIS extends Component {
   constructor(props, context) {
     super(props, context);
 
@@ -22,6 +25,8 @@ class ClientMIS extends Component {
       productId: "",
       search: "",
       clientId: "",
+      clients: "",
+      selectedClient: "",
       startDate: moment().startOf("month"),
       endDate: moment()
     };
@@ -31,21 +36,33 @@ class ClientMIS extends Component {
     var ls = localStorage.getItem("wss.auth");
     var jwtToken = JSON.parse(ls);
 
-    if (jwtToken && jwtToken.page === "Client") {
-      this.setState({ page: jwtToken.page, clientId: jwtToken.sidClientId });
+    //this.setState({ page: jwtToken.page, clientId: jwtToken.sidClientId });
 
-      this.getClients(jwtToken.sidClientId);
-      this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
-      //this.getClientProducts(jwtToken.sidClientId);
-    } else {
-      localStorage.removeItem("wss.auth");
-      window.location.reload();
-      this.props.history.push("/login");
-    }
+    this.getClients(5);
+    this.getAllClients();
+    this.getClientVaults(5, "ThisMonth");
+
+    // if (jwtToken && jwtToken.page === "Client") {
+    //   this.setState({ page: jwtToken.page, clientId: jwtToken.sidClientId });
+
+    //   this.getClients(jwtToken.sidClientId);
+    //   this.getAllClients();
+    //   this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
+    // } else {
+    //   localStorage.removeItem("wss.auth");
+    //   //   //window.location.reload();
+    //   //   //this.props.history.push("/login");
+    // }
   }
 
   onChange(e) {
     const { name, value } = e.target;
+    this.setState({ [name]: value });
+
+    if (name === "selectedClient" && value !== null) {
+      this.getClientVaults(value);
+    }
+
     if (name === "productId") {
       this.getProductStockList(value);
     }
@@ -82,15 +99,46 @@ class ClientMIS extends Component {
     });
   }
 
+  handleNavigation = entity => {
+    console.log(entity);
+    console.log(this.state.selectedClient);
+    //get productName
+  };
+
   render() {
-    const { clientVaults, search } = this.state;
+    const {
+      clientVaults,
+      search,
+      startDate,
+      endDate,
+      clients,
+      selectedClient
+    } = this.state;
+    const allClients = lookupDropDown(clients);
+
+    const dropClients = () => {
+      if (clients) {
+        return (
+          <SelectInput
+            name="selectedClient"
+            label=" Clients"
+            value={selectedClient}
+            onChange={this.onChange}
+            defaultOption="Select Client"
+            options={allClients}
+          />
+        );
+      }
+    };
+
     let filteredStocks;
+
+    var start = moment(startDate._d).format("L");
+    var end = moment(endDate._d).format("L");
 
     if (clientVaults) {
       filteredStocks = clientVaults.filter(entity => {
-        return (
-          entity.stock.product.toLowerCase().indexOf(this.state.search) !== -1
-        );
+        return entity.product.toLowerCase().indexOf(this.state.search) !== -1;
       });
     }
 
@@ -101,11 +149,17 @@ class ClientMIS extends Component {
             <tr key={index}>
               <th scope="row">{index + 1}</th>
               <td>
-                <NavLink to={"/mis/" + entity.stockId}>
-                  {entity.stock.product}
+                <NavLink
+                  onClick={() => this.handleNavigation(entity)}
+                  to={"/manager/" + this.state.selectedClient + "/" + entity.id}
+                >
+                  {entity.product}
                 </NavLink>
               </td>
               <td>{entity.openingStock}</td>
+              <td>{entity.totalAddition}</td>
+              <td>{entity.totalWaste}</td>
+              <td>{entity.totalIssuance}</td>
               <td>{entity.closingBalance}</td>
               <td>{moment(entity.date).format("DD-MMM-YYYY")}</td>
             </tr>
@@ -127,14 +181,15 @@ class ClientMIS extends Component {
                 <div className="row">
                   <div className="col-md-12">
                     <div className="row" style={{ margin: "20px 0 20px" }}>
-                      <div className="col-lg-4">
-                        <input
-                          type="text"
-                          value={this.state.search}
-                          onChange={this.updateSearch.bind(this)}
-                          placeholder=" Search Job Remark"
-                        />
-                      </div>
+                      <ReactToExcel
+                        className="btn btn-primary pull-right"
+                        table="table-to-xls"
+                        filename="sidims-stock-report"
+                        sheet="Sheet 1"
+                        buttonText="Export to Excel"
+                      />
+
+                      <div className="col-lg-4 pull-left">{dropClients()}</div>
 
                       <div className="col-lg-4 pull-right">
                         <div className="row">
@@ -172,9 +227,10 @@ class ClientMIS extends Component {
                         </div>
                       </div>
 
-                      <div className="col-lg-4 pull-right">
+                      {/*
+                      <div className="col-lg-4 pull-left">
                         <a onClick={this.onLastMonthFilter}>Last Month</a>
-                      </div>
+                      </div>*/}
                     </div>
 
                     <table
@@ -183,10 +239,13 @@ class ClientMIS extends Component {
                     >
                       <thead>
                         <tr>
-                          <th scope="col">#</th>
-                          <th scope="col">Product Name</th>
+                          <th scope="col">SN</th>
+                          <th scope="col">Description</th>
                           <th scope="col">Opening Stock</th>
-                          <th scope="col">Current Stock</th>
+                          <th>New Stock</th>
+                          <th>Waste</th>
+                          <th>Personalization</th>
+                          <th scope="col">Closing Stock</th>
                           <th>Last Updated</th>
                         </tr>
                       </thead>
@@ -204,16 +263,26 @@ class ClientMIS extends Component {
 
   getClients(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId)
+      .get(myConfig.apiUrl + "/api/clients/" + clientId)
       .then(response => {
         this.setState({ client: response.data });
       })
       .catch(function(error) {});
   }
 
+  getAllClients(clientId) {
+    axios
+      .get(myConfig.apiUrl + "/api/clients")
+      .then(response => {
+        console.log(response.data);
+        this.setState({ clients: response.data });
+      })
+      .catch(function(error) {});
+  }
+
   getClientProducts(clientId) {
     axios
-      .get("https://localhost:5001/api/clients/" + clientId + "/products")
+      .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products")
       .then(response => {
         this.setState({ products: response.data });
       })
@@ -223,7 +292,8 @@ class ClientMIS extends Component {
   getClientVaults(clientId, rangeType, startDate, endDate) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
+        myConfig.apiUrl +
+          "/api/clients/" +
           clientId +
           "/ProductStockSummary?rangeType=" +
           rangeType +
@@ -241,9 +311,7 @@ class ClientMIS extends Component {
   getProductStockList(clientId, productId) {
     axios
       .get(
-        "https://localhost:5001/api/clients/" +
-          clientId +
-          "/ProductStockSummary"
+        myConfig.apiUrl + "/api/clients/" + clientId + "/ProductStockSummary"
       )
       .then(response => {
         console.log(response.data);
@@ -251,15 +319,6 @@ class ClientMIS extends Component {
       })
       .catch(function(error) {});
   }
-
-  // getProductStockList(clientId, productId) {
-  //   axios
-  //     .get("https://localhost:5001/api/clients/" + clientId + "/products/" + productId + "/stocklists")
-  //     .then(response => {
-  //       this.setState({ stockReports: response.data });
-  //     })
-  //     .catch(function(error) {});
-  // }
 }
 
-export default ClientMIS;
+export default ManagerMIS;

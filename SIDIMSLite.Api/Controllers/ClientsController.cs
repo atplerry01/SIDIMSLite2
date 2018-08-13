@@ -257,7 +257,7 @@ namespace SIDIMSLite.Api.Controllers
             var StockSummaryResource = new StockSummaryResource()
             {
                 StockCount = query,
-                CurrentStock = vaultCount.ClosingBalance,
+                CurrentStock = Convert.ToInt32(vaultCount.ClosingBalance),
                 Filter = rangeType
             };
 

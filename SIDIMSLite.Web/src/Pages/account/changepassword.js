@@ -4,6 +4,7 @@ import axios from "axios";
 import Validator from "validator";
 import PropTypes from "prop-types";
 
+import { myConfig } from "../../App/config";
 import InlineError from "../../Components/common/InlineError";
 
 class ChangePassword extends Component {
@@ -77,7 +78,8 @@ class ChangePassword extends Component {
         <div className="col-lg-4">
           <header>
             <h2>
-              <span className="icon-pagesx" />Change Password
+              <span className="icon-pagesx" />
+              Change Password
             </h2>
           </header>
 

@@ -11,6 +11,7 @@ import LoginPage from "../Pages/login/LoginPage";
 
 import AdminPage from "../Pages/admin/admin";
 import CreateUser from "../Pages/admin/createuser";
+import CreateRMUser from "../Pages/admin/create-rm";
 import ClientMIS from "../Pages/client/mis";
 import StockDetail from "../Pages/client/stocklist";
 import Inventory from "../Pages/inventory/mis";
@@ -18,6 +19,8 @@ import ChangePassword from "../Pages/account/changepassword";
 import ConfirmEmail from "../Pages/account/confirmemail";
 import UpdateUser from "../Pages/admin/updateuser";
 import ForgotPassword from "../Pages/account/forgotpassword";
+import ManagerMIS from "../Pages/manager/mis";
+import ManagerMISDetail from "../Pages/manager/stocklist";
 
 class App extends Component {
   constructor(props, context) {
@@ -131,6 +134,13 @@ class App extends Component {
                   />
 
                   <Route
+                    path="/admin/create-rm"
+                    exact
+                    component={Admin(CreateRMUser)}
+                    {...this.state}
+                  />
+
+                  <Route
                     path="/admin/update-user/:id"
                     exact
                     component={Admin(UpdateUser)}
@@ -142,6 +152,14 @@ class App extends Component {
                     exact
                     component={Client(StockDetail)}
                   />
+
+                  <Route path="/manager" exact component={ManagerMIS} />
+                  <Route
+                    path="/manager/:clientId/:id"
+                    exact
+                    component={ManagerMISDetail}
+                  />
+
                   <Route
                     path="/inventory"
                     exact

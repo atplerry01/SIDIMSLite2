@@ -46,7 +46,7 @@
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    From = new MailAddress("sidims@secureidltd.com"),
                     Subject = subject,
                     IsBodyHtml = true,
                     Body = messageBody
@@ -56,7 +56,7 @@
 
                 var smtpClient = new SmtpClient
                 {
-                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Credentials = new NetworkCredential("sidims@secureidltd.com", "Whycespace@01"),
                     Host = "smtp.secureidltd.com",
                     Port = 587
                 };
