@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 import "../../Components/common/custom-component.css";
+import Logo from "../../assets/images/sid-white.png";
 
 import HomeHeader from "../../Components/common/HomeHeader";
 import PageHeader from "../../Components/common/PageHeader";
@@ -12,16 +13,16 @@ class Header extends Component {
 
     const ls = localStorage.getItem("wss.auth");
     const jwtToken = JSON.parse(ls);
-    var fullName, clientName;
+    var fullName, customer;
 
     if (jwtToken) {
       fullName = jwtToken.firstName + " " + jwtToken.lastName;
-      clientName = jwtToken.clientName;
+      customer = jwtToken.clientName;
     }
 
     this.state = {
       fullName: fullName,
-      clientName: clientName
+      customer: customer
     };
   }
 
@@ -37,6 +38,11 @@ class Header extends Component {
   render() {
     var ls = localStorage.getItem("wss.auth");
     var jwtToken = JSON.parse(ls);
+    var customer;
+
+    if (jwtToken) {
+      customer = jwtToken.clientName;
+    }
 
     return (
       <header id="hero" className="hero overlay">
@@ -58,7 +64,7 @@ class Header extends Component {
                 className="brand"
                 style={{ fontSize: "32px", color: "#fff" }}
               >
-                SIDIMSLite
+                <img src={Logo} style={{ width: 190 }} />
               </NavLink>
             </div>
             <div className="navbar-collapse collapse" id="navbar-collapse">
@@ -71,9 +77,7 @@ class Header extends Component {
                         <div style={{ fontSize: "14px" }}>
                           {this.state.fullName}
                         </div>
-                        <div style={{ fontSize: "10px" }}>
-                          {jwtToken.clientName}
-                        </div>
+                        <div style={{ fontSize: "10px" }}>{customer}</div>
                       </a>
                     </div>
                   )}

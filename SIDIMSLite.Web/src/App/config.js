@@ -1,1 +1,4 @@
-export const myConfig = { importantData: "", apiUrl: "https://localhost:5001" };
+export const myConfig = {
+  importantData: "",
+  apiUrl: "http://192.168.1.189:5001"
+};

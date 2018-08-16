@@ -26,7 +26,7 @@ class ManagerMIS extends Component {
       search: "",
       clientId: "",
       clients: "",
-      selectedClient: "",
+      selectedClient: 5,
       startDate: moment().startOf("month"),
       endDate: moment()
     };
@@ -60,6 +60,7 @@ class ManagerMIS extends Component {
     this.setState({ [name]: value });
 
     if (name === "selectedClient" && value !== null) {
+      this.setState({ selectedClient: value });
       this.getClientVaults(value);
     }
 
@@ -79,12 +80,11 @@ class ManagerMIS extends Component {
   }
 
   onDateFilter() {
-    const { startDate, endDate, clientVaults } = this.state;
-
+    const { startDate, endDate, selectedClient } = this.state;
     var start = moment(startDate._d).format("L");
     var end = moment(endDate._d).format("L");
-
-    this.getClientVaults(this.state.clientId, "DateRange", start, end);
+    console.log(selectedClient);
+    this.getClientVaults(selectedClient, "DateRange", start, end);
   }
 
   handleStartDateChange(date) {
@@ -102,18 +102,23 @@ class ManagerMIS extends Component {
   handleNavigation = entity => {
     console.log(entity);
     console.log(this.state.selectedClient);
-    //get productName
   };
 
   render() {
     const {
       clientVaults,
-      search,
       startDate,
       endDate,
       clients,
       selectedClient
     } = this.state;
+
+    let currentSelectedClient;
+
+    if (selectedClient === null || selectedClient === "") {
+      currentSelectedClient = 5;
+    }
+
     const allClients = lookupDropDown(clients);
 
     const dropClients = () => {
