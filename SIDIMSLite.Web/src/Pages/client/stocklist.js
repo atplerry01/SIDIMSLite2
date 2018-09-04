@@ -151,8 +151,8 @@ class Inventory extends Component {
     const stockSummaryDiv = () => {
       const { startDate, endDate } = this.state;
 
-      var start = moment(startDate._d).format("L");
-      var end = moment(endDate._d).format("L");
+      var start = moment(startDate._d).format("DD/MM/YYYY");
+      var end = moment(endDate._d).format("DD/MM/YYYY");
 
       console.log(start, end);
 

@@ -31,6 +31,8 @@ class LoginPage extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
+    console.log("started");
+
     this.setState({ submitted: true });
     const { username, password } = this.state;
 
@@ -39,12 +41,16 @@ class LoginPage extends Component {
         "grant_type=password&username=" + username + "&password=" + password;
       data = data + "&client_id=ngAuthApp";
 
+      console.log(data);
+
       return axios
         .post(myConfig.apiUrl + "/api/token", data, {
           headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
         .then(auth => {
           localStorage.setItem("wss.auth", JSON.stringify(auth.data));
+
+          console.log(auth.data);
 
           this.setState({ page: auth.data.page, clientId: auth.data.clientId });
 
@@ -91,8 +97,6 @@ class LoginPage extends Component {
     };
 
     const { username, password, errors } = this.state;
-
-    console.log(errors);
 
     return (
       <div className="row">

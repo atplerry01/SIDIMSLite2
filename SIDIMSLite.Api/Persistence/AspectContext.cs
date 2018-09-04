@@ -26,7 +26,7 @@ namespace SIDIMSLite.Api.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("server=192.168.1.27; database=Aspect; user id=sa; password=kolawole");
+                optionsBuilder.UseSqlServer("server=192.168.1.34; database=SIDIMSLite2; user id=sa; password=kolawole");
             }
         }
 

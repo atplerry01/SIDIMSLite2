@@ -83,7 +83,7 @@ class ClientMIS extends Component {
   }
 
   render() {
-    const { clientVaults, search, startDate, endDate } = this.state;
+    let { clientVaults, search, startDate, endDate } = this.state;
     let filteredStocks;
 
     var start = moment(startDate._d).format("L");

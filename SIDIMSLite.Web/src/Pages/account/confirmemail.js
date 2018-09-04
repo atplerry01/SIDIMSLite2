@@ -25,7 +25,8 @@ class ConfirmEmail extends Component {
   getConfirmEmail(userId, code) {
     axios
       .post(
-        "https://localhost:5001/api/account/ConfirmEmail/?userId=" +
+        myConfig.apiUrl +
+          "/api/account/ConfirmEmail/?userId=" +
           userId +
           "&code=" +
           code

@@ -71,6 +71,11 @@ namespace SIDIMSLite.Api.Utils
                 clientRole = role.Name;
             }
 
+            if (clientRole == "" && user.UserName == "admin")
+            {
+                clientRole = "Admin";
+            }
+
             if (refreshToken == null)
             {
                 refreshToken = new RefreshToken()
@@ -99,15 +104,7 @@ namespace SIDIMSLite.Api.Utils
             var clientName = "";
             bool isReviewed = false;
 
-            // if (clientUser.SidClientId > 0 && clientUser !== null) {
-            //     clientId = clientUser.SidClientId;
-            // }
-
-            if (clientUser == null)
-            {
-                //
-            }
-            else
+            if (clientUser != null)
             {
                 clientId = clientUser.SidClientId;
                 clientName = clientUser.ClientName;
@@ -117,8 +114,6 @@ namespace SIDIMSLite.Api.Utils
                     isReviewed = true;
                 }
             }
-
-
 
             var response = new LoginResponseData
             {

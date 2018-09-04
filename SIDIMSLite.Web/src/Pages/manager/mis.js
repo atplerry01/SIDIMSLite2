@@ -61,6 +61,7 @@ class ManagerMIS extends Component {
 
     if (name === "selectedClient" && value !== null) {
       this.setState({ selectedClient: value });
+      console.log(value);
       this.getClientVaults(value);
     }
 
@@ -122,12 +123,12 @@ class ManagerMIS extends Component {
     const allClients = lookupDropDown(clients);
 
     const dropClients = () => {
-      if (clients) {
+      if (allClients) {
         return (
           <SelectInput
             name="selectedClient"
             label=" Clients"
-            value={selectedClient}
+            value={currentSelectedClient}
             onChange={this.onChange}
             defaultOption="Select Client"
             options={allClients}
@@ -148,6 +149,8 @@ class ManagerMIS extends Component {
     }
 
     const stockReportTable = () => {
+      console.log(clientVaults);
+
       if (clientVaults) {
         return filteredStocks.map((entity, index) => {
           return (
@@ -308,9 +311,12 @@ class ManagerMIS extends Component {
           endDate
       )
       .then(response => {
+        console.log(response.data);
         this.setState({ clientVaults: response.data });
       })
-      .catch(function(error) {});
+      .catch(function(error) {
+        console.log(error);
+      });
   }
 
   getProductStockList(clientId, productId) {

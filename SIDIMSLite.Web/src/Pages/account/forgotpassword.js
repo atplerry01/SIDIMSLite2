@@ -37,7 +37,7 @@ class ForgotPassword extends Component {
       };
 
       axios
-        .post("https://localhost:5001/api/account/ForgotPassword", userData)
+        .post(myConfig.apiUrl + "/api/account/ForgotPassword", userData)
         .then(response => {
           console.log(response.data);
           toastr.success("Email Sent Successful.", "Password Reset");

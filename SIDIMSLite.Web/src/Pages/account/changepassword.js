@@ -54,10 +54,7 @@ class ChangePassword extends Component {
       };
 
       axios
-        .post(
-          "https://localhost:5001/api/account/ChangePassword",
-          changePassword
-        )
+        .post(myConfig.apiUrl + "/api/account/ChangePassword", changePassword)
         .then(response => {
           console.log(response.data);
           toastr.success("Change Successful.", "Password Change");

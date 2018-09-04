@@ -97,7 +97,7 @@ namespace SIDIMSLite.Api.Controllers
             if (rangeType == "ThisMonth")
             {
                 first = 1;
-                last = 31;
+                last = 30;
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
 
@@ -159,7 +159,7 @@ namespace SIDIMSLite.Api.Controllers
             if (rangeType == "ThisMonth")
             {
                 first = 1;
-                last = 31;
+                last = 30;
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
 
@@ -213,7 +213,7 @@ namespace SIDIMSLite.Api.Controllers
             if (rangeType == "ThisMonth")
             {
                 first = 1;
-                last = 31;
+                last = 30;
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
 
@@ -268,7 +268,6 @@ namespace SIDIMSLite.Api.Controllers
         [HttpGet("{clientId}/ProductStockSummary")]
         public async Task<IEnumerable<StockVaultModel>> GetClientTestVaults(int clientId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
         {
-
             DateTime start = new DateTime();
             DateTime end = new DateTime();
 
@@ -278,7 +277,7 @@ namespace SIDIMSLite.Api.Controllers
             if (rangeType == "ThisMonth")
             {
                 first = 1;
-                last = 31;
+                last = 30; //Todo: Fix for Leap year
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
 
@@ -336,11 +335,37 @@ namespace SIDIMSLite.Api.Controllers
                 item.TotalWaste = GetWaste(item.Id, start, end);
                 item.OpeningStock = GetOpeningStock(item.Id, start, end);
                 item.ClosingBalance = (item.OpeningStock + item.TotalAddition - item.TotalWaste - item.TotalIssuance); //GetClosingStock(item.Id, start, end);
+                var lastedDate = GetLastUpdate(item.Id);
+                if (lastedDate == null)
+                {
+                    item.Date = item.Date;
+                }
+                else
+                {
+                    item.Date = Convert.ToDateTime(lastedDate);
+                }
+                //item.Date = GetLastUpdate(item.Id);
             }
 
             return productModel;
         }
 
+        private String GetLastUpdate(int productId)
+        {
+            string lastUpdate;
+            var query = context.Mis.Where(p => p.StockId == productId).LastOrDefault();
+
+            if (query != null)
+            {
+                lastUpdate = query.Date.ToString();
+            }
+            else
+            {
+                lastUpdate = null;
+            }
+
+            return lastUpdate;
+        }
         private int GetOpeningStock(int productId, DateTime start, DateTime end)
         {
             var balance = 0;

@@ -594,13 +594,14 @@ namespace SIDIMSLite.Api.Controllers
         {
 
             var user = new ApplicationUser() { UserName = "atplerry", Email = "atplerry@gmail.com", IsEnabled = true, EmailConfirmed = true, FirstName = "Akinsanya", LastName = "Olanrewaju" };
-            var result = await userManager.CreateAsync(user, "akinlanre@01");
+            var result = await userManager.CreateAsync(user, "SidClient@01");
 
             if (roleManager.Roles.Count() == 0)
             {
                 await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
                 await roleManager.CreateAsync(new IdentityRole { Name = "Client" });
                 await roleManager.CreateAsync(new IdentityRole { Name = "Inventory" });
+                await roleManager.CreateAsync(new IdentityRole { Name = "Manager" });
             }
 
             //var u = await userManager.FindByNameAsync("admin");
@@ -644,6 +645,23 @@ namespace SIDIMSLite.Api.Controllers
 
         }
 
+        [HttpPost("create-roles")]
+        public async Task<IActionResult> CreateRoles()
+        {
+
+
+            if (roleManager.Roles.Count() == 0)
+            {
+                await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
+                await roleManager.CreateAsync(new IdentityRole { Name = "Client" });
+                await roleManager.CreateAsync(new IdentityRole { Name = "Inventory" });
+                await roleManager.CreateAsync(new IdentityRole { Name = "Manager" });
+            }
+
+
+            return Content("Success", "text/html");
+
+        }
 
 
     }
