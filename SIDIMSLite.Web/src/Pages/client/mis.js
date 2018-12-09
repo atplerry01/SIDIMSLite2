@@ -6,6 +6,7 @@ import moment from "moment";
 import ReactToExcel from "react-html-table-to-excel";
 import ExampleCustomInput from "../../Components/calender/ExampleCustomInput";
 import { myConfig } from "../../App/config";
+import faqs from "../../assets/faqs.pdf";
 
 class ClientMIS extends Component {
   constructor(props, context) {
@@ -24,8 +25,16 @@ class ClientMIS extends Component {
       search: "",
       clientId: "",
       startDate: moment().startOf("month"),
+      lastDate: "",
       endDate: moment()
     };
+  }
+
+  componentDidMount() {
+    var start = moment(this.state.startDate._d).format("DD-MMM-YYYY");
+    var end = moment(this.state.endDate._d).format("DD-MMM-YYYY");
+
+    this.setState({ lastDate: end, firstDate: start });
   }
 
   componentWillMount() {
@@ -39,8 +48,6 @@ class ClientMIS extends Component {
       this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
     } else {
       localStorage.removeItem("wss.auth");
-      //window.location.reload();
-      //this.props.history.push("/login");
     }
   }
 
@@ -62,12 +69,13 @@ class ClientMIS extends Component {
   }
 
   onDateFilter() {
-    const { startDate, endDate, clientVaults } = this.state;
+    const { startDate, endDate } = this.state;
 
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
 
     this.getClientVaults(this.state.clientId, "DateRange", start, end);
+    this.setState({ lastDate: end, firstDate: start });
   }
 
   handleStartDateChange(date) {
@@ -82,19 +90,68 @@ class ClientMIS extends Component {
     });
   }
 
+  renderPersoStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    return (
+      <NavLink
+        to={
+          "/manager/" +
+          clientId +
+          "/" +
+          productId +
+          "/perso/" +
+          start +
+          "/" +
+          end
+        }
+      >
+        {entity}
+      </NavLink>
+    );
+  }
+
+  renderNewStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    return (
+      <NavLink to={"/new-stock/" + productId + "/" + start + "/" + end}>
+        {entity}
+      </NavLink>
+    );
+  }
+
+  renderWasteStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    //+ "/" + start + "/" + end
+    return <NavLink to={"/issuance/" + productId}>{entity}</NavLink>;
+  }
+
   render() {
     let { clientVaults, search, startDate, endDate } = this.state;
     let filteredStocks;
 
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
 
     if (clientVaults) {
       filteredStocks = clientVaults.filter(entity => {
         return entity.product.toLowerCase().indexOf(this.state.search) !== -1;
       });
     }
-
     const stockReportTable = () => {
       if (clientVaults) {
         return filteredStocks.map((entity, index) => {
@@ -102,12 +159,34 @@ class ClientMIS extends Component {
             <tr key={index}>
               <th scope="row">{index + 1}</th>
               <td>
-                <NavLink to={"/mis/" + entity.id}>{entity.product}</NavLink>
+                {this.renderWasteStock(
+                  entity.product,
+                  this.state.selectedClient,
+                  entity.id
+                )}
               </td>
               <td>{entity.openingStock}</td>
-              <td>{entity.totalAddition}</td>
-              <td>{entity.totalWaste}</td>
-              <td>{entity.totalIssuance}</td>
+              <td>
+                {this.renderNewStock(
+                  entity.totalAddition,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
+              <td>
+                {this.renderWasteStock(
+                  entity.totalIssuance,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
+              <td>
+                {this.renderWasteStock(
+                  entity.totalWaste,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
               <td>{entity.closingBalance}</td>
               <td>{moment(entity.date).format("DD-MMM-YYYY")}</td>
             </tr>
@@ -123,12 +202,51 @@ class ClientMIS extends Component {
             <div className="row">
               <div className="col-lg-12" ref={el => (this.componentRef = el)}>
                 <header>
-                  <h2>Stock Status</h2>
+                  <div className="pull-right" style={{ fontSize: 13 }}>
+                    <a
+                      style={{ display: "table-cell" }}
+                      href="https://www.dropbox.com/s/5i6if2t4zbsgt46/FAQs.pdf?dl=0"
+                      target="_blank"
+                    >
+                      FAQs
+                      {" - "}
+                    </a>
+
+                    <a
+                      style={{ display: "table-cell" }}
+                      href="https://www.dropbox.com/s/5i6if2t4zbsgt46/FAQs.pdf?dl=0"
+                      target="_blank"
+                    >
+                      {" - "}
+                      User Manual
+                    </a>
+                  </div>
+                  <div className="pull-right">
+                    <h2 style={{ fontSize: 20 }}>
+                      <NavLink to="/stock-status">View Stock Status</NavLink>
+                    </h2>
+                  </div>
+                  <h2 style={{ color: "blue" }}>
+                    Stock Report as at {this.state.lastDate}
+                  </h2>
+                  <h2 style={{ fontSize: 20 }}>
+                    from {this.state.firstDate} to {this.state.lastDate}
+                  </h2>
                 </header>
 
                 <div className="row">
                   <div className="col-md-12">
                     <div className="row" style={{ margin: "20px 0 20px" }}>
+                      <div className="col-lg-4">
+                        <input
+                          style={{ width: 300 }}
+                          type="text"
+                          value={this.state.search}
+                          onChange={this.updateSearch.bind(this)}
+                          placeholder=" Search Product"
+                        />
+                      </div>
+
                       <ReactToExcel
                         className="btn btn-primary pull-right"
                         table="table-to-xls"
@@ -137,13 +255,6 @@ class ClientMIS extends Component {
                         buttonText="Export to Excel"
                       />
 
-                      {/*
-                      <div className="col-lg-4 pull-left">
-                        <h2 style={{ fontSize: 18 }}>
-                          <strong>Report:</strong> {start} - {end}
-                        </h2>
-                      </div>
-                      */}
                       <div className="col-lg-4 pull-right">
                         <div className="row">
                           <div className="col-lg-4">
@@ -153,6 +264,7 @@ class ClientMIS extends Component {
                               onChange={this.handleStartDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -165,6 +277,7 @@ class ClientMIS extends Component {
                               onChange={this.handleEndDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -172,18 +285,13 @@ class ClientMIS extends Component {
                           <div className="col-lg-4">
                             <input
                               type="submit"
-                              value="Filter"
+                              value="Query"
                               className="btn btn-primary"
                               onClick={this.onDateFilter}
                             />
                           </div>
                         </div>
                       </div>
-
-                      {/*
-                      <div className="col-lg-4 pull-left">
-                        <a onClick={this.onLastMonthFilter}>Last Month</a>
-                      </div>*/}
                     </div>
 
                     <table
@@ -193,11 +301,11 @@ class ClientMIS extends Component {
                       <thead>
                         <tr>
                           <th scope="col">SN</th>
-                          <th scope="col">Description</th>
+                          <th scope="col">Products</th>
                           <th scope="col">Opening Stock</th>
                           <th>New Stock</th>
-                          <th>Waste</th>
                           <th>Personalization</th>
+                          <th>Waste</th>
                           <th scope="col">Closing Stock</th>
                           <th>Last Updated</th>
                         </tr>
@@ -262,15 +370,6 @@ class ClientMIS extends Component {
       })
       .catch(function(error) {});
   }
-
-  // getProductStockList(clientId, productId) {
-  //   axios
-  //     .get(myConfig.apiUrl + "/api/clients/" + clientId + "/products/" + productId + "/stocklists")
-  //     .then(response => {
-  //       this.setState({ stockReports: response.data });
-  //     })
-  //     .catch(function(error) {});
-  // }
 }
 
 export default ClientMIS;

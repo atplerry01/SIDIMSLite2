@@ -3,6 +3,8 @@ import toastr from "toastr";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
 import { myConfig } from "../../App/config";
+import loadingImageSrc from "../../assets/images/loading_icon.gif";
+import LoadingSpinner from "../../Components/common/LoadingSpinner";
 
 class LoginPage extends Component {
   constructor(props, context) {
@@ -12,7 +14,8 @@ class LoginPage extends Component {
       username: "",
       password: "",
       submitted: false,
-      errors: {}
+      errors: {},
+      loading: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -42,12 +45,16 @@ class LoginPage extends Component {
       data = data + "&client_id=ngAuthApp";
 
       console.log(data);
+      this.setState({ loading: false });
 
+      console.log("start login");
       return axios
         .post(myConfig.apiUrl + "/api/token", data, {
           headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
         .then(auth => {
+          this.setState({ loading: true });
+          console.log("end login");
           localStorage.setItem("wss.auth", JSON.stringify(auth.data));
 
           console.log(auth.data);
@@ -74,6 +81,8 @@ class LoginPage extends Component {
           window.location.reload();
         })
         .catch(error => {
+          console.log("end login");
+          this.setState({ loading: false });
           toastr.error("Incorrect Username/ Password", "Login Failed");
           console.log(error);
           const errors = {};
@@ -96,7 +105,8 @@ class LoginPage extends Component {
       margin: "40px 0 0 0"
     };
 
-    const { username, password, errors } = this.state;
+    const { username, password, errors, loading } = this.state;
+    let loadingImage;
 
     return (
       <div className="row">
@@ -140,7 +150,7 @@ class LoginPage extends Component {
                 )}
               </div>
               <input type="submit" value="Submit" onClick={this.handleSubmit} />
-
+              { }
               <span className="clearfix" />
               <br />
               <NavLink to="/forgot-password" style={{ fontSize: 13 }}>

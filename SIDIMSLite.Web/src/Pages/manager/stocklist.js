@@ -21,6 +21,7 @@ class ManagerMISDetail extends Component {
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.onDateFilter = this.onDateFilter.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.handleShow = this.handleShow.bind(this);
     this.onLastMonthFilter = this.onLastMonthFilter.bind(this);
 
     this.state = {
@@ -33,7 +34,8 @@ class ManagerMISDetail extends Component {
       clientId: "",
       dateRange: "",
       stockLogModalShow: false,
-      stockLogs: ""
+      stockLogs: "",
+      IssuanceStockReports: []
     };
   }
 
@@ -45,20 +47,32 @@ class ManagerMISDetail extends Component {
     axios
       .get(myConfig.apiUrl + "/api/clients/stocklog/" + data.id)
       .then(response => {
-        this.setState({ stockLogs: response.data });
+        this.setState({ stockLogs: response.data, stockLogModalShow: true });
+        //this.setState({ stockLogModalShow: true });
       })
-      .catch(function(error) {});
+      .catch(function(error) {
+        //this.setState({ stockLogModalShow: true });
+      });
 
-    this.setState({ stockLogModalShow: true });
+    console.log(this.state);
+  }
+
+  componentDidMount() {
+    const {
+      match: { params }
+    } = this.props;
+
+    var start = moment(params.startDate).format("DD/MM/YYYY");
+    var end = moment(params.endDate).format("DD/MM/YYYY");
+
+    console.log(params);
+    this.getProductStockSummary(params.productId, "DateRange");
   }
 
   componentWillMount() {
     const {
       match: { params }
     } = this.props;
-
-    var ls = localStorage.getItem("wss.auth");
-    var jwtToken = JSON.parse(ls);
 
     if (params && params.clientId) {
       this.getProductById(params.id);
@@ -102,30 +116,22 @@ class ManagerMISDetail extends Component {
     const {
       match: { params }
     } = this.props;
-    const { startDate, endDate, stockReports } = this.state;
+    const { startDate, endDate } = this.state;
 
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
 
     this.getProductStockList(params.id, "DateRange", start, end);
     this.getProductStockSummary(params.id, "DateRange", start, end);
   }
 
   handleStartDateChange(date) {
-    // if (this.state.filterChange == true) {
-    //   this.getProductStockList(this.state.selectedProductId);
-    // }
-
     this.setState({
       startDate: date
     });
   }
 
   handleEndDateChange(date) {
-    // if (this.state.filterChange == true) {
-    //   this.getProductStockList(this.state.selectedProductId);
-    // }
-
     this.setState({
       endDate: date
     });
@@ -147,12 +153,6 @@ class ManagerMISDetail extends Component {
 
     if (name === "clientId" && value !== null) {
       this.getProduct(value);
-    }
-
-    if (name === "productId") {
-      //this.getProductById(value);
-      //this.getProductStockList(value);
-      //this.getProductStockSummary(params.id);
     }
   }
 
@@ -184,16 +184,27 @@ class ManagerMISDetail extends Component {
     const stockSummaryDiv = () => {
       const { startDate, endDate } = this.state;
 
-      var start = moment(startDate._d).format("L");
-      var end = moment(endDate._d).format("L");
+      var start = moment(startDate._d).format("DD-MMM-YYYY");
+      var end = moment(endDate._d).format("DD-MMM-YYYY");
 
       if (stockSummary) {
         return (
           <div>
-            <h3>Summary</h3>
-            <div>Current Stock: {stockSummary.currentStock}</div>
+            <h3>
+              Summary (This view provides information on Card Consumption -
+              Issuance + Waste - For a specific date Or the date range selected
+              by you).
+            </h3>
             <div>
-              Total Consumption: {stockSummary.stockCount} ({start} - {end})
+              <h3 style={{ color: "blue" }}>
+                Current Stock: {stockSummary.currentStock} Cards
+              </h3>
+            </div>
+            <div>
+              <h3 style={{ color: "blue" }}>
+                Consumption: {stockSummary.stockCount} Cards; From: {start} -
+                To: {end}
+              </h3>
             </div>
           </div>
         );
@@ -223,16 +234,14 @@ class ManagerMISDetail extends Component {
           return (
             <tr key={index}>
               <th scope="row">{index + 1}</th>
-              <td>{stock.fileName}</td>
-              <td>{stock.openingStock}</td>
-              <td>{stock.operation.operation}</td>
-              <td>{stock.cardQuantity}</td>
-              <td>{stock.closingBalance}</td>
               <td>
                 <span style={{ fontSize: "8" }}>
                   {moment(stock.date).format("DD-MMM-YYYY")}
                 </span>
               </td>
+              <td>{stock.fileName}</td>
+              <td>{stock.issuanceQuantity}</td>
+              <td>{stock.wasteQuantity}</td>
             </tr>
           );
         });
@@ -303,7 +312,7 @@ class ManagerMISDetail extends Component {
                         style={{ fontSize: "18px" }}
                         aria-hidden="true"
                       />{" "}
-                      Print this out!
+                      Print this out! sss
                     </a>
                   )}
                   content={() => this.componentRef}
@@ -331,7 +340,7 @@ class ManagerMISDetail extends Component {
                           placeholder=" Search Job Remark"
                         />
                       </div>
-                      <div className="col-lg-4 pull-right">
+                      <div className="col-lg-7 pull-right">
                         <div className="row">
                           <div className="col-lg-4">
                             <DatePicker
@@ -340,6 +349,7 @@ class ManagerMISDetail extends Component {
                               onChange={this.handleStartDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -352,6 +362,7 @@ class ManagerMISDetail extends Component {
                               onChange={this.handleEndDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -378,12 +389,10 @@ class ManagerMISDetail extends Component {
                       <thead>
                         <tr>
                           <th scope="col">#</th>
-                          <th scope="col">Description</th>
-                          <th scope="col">Opening Stock</th>
-                          <th scope="col">Operation</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Current Stock</th>
                           <th>Date</th>
+                          <th scope="col">JobName</th>
+                          <th scope="col">Issuance</th>
+                          <th scope="col">Waste</th>
                         </tr>
                       </thead>
                       <tbody>{stockReportTable()}</tbody>
@@ -450,13 +459,14 @@ class ManagerMISDetail extends Component {
       .catch(function(error) {});
   }
 
+  //stockreports
   getProductStockList(productId, rangeType, startDate, endDate) {
     axios
       .get(
         myConfig.apiUrl +
           "/api/clients/" +
           productId +
-          "/stockreports?rangeType=" +
+          "/IssuanceStockReports?rangeType=" +
           rangeType +
           "&startDate=" +
           startDate +
@@ -464,6 +474,7 @@ class ManagerMISDetail extends Component {
           endDate
       )
       .then(response => {
+        console.log(response.data);
         this.setState({ stockReports: response.data });
       })
       .catch(function(error) {});

@@ -77,7 +77,7 @@ class Header extends Component {
                         <div style={{ fontSize: "14px" }}>
                           {this.state.fullName}
                         </div>
-                        <div style={{ fontSize: "10px" }}>{customer}</div>
+                        <div style={{ fontSize: "18px" }}>{customer}</div>
                       </a>
                     </div>
                   )}

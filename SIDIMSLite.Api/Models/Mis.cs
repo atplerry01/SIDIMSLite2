@@ -4,8 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SIDIMSLite.Api.Models
 {
+
     public class Mis
     {
+        public Mis()
+        {
+            CardQuantity = 0;
+        }
+
         public int Id { get; set; }
         public int StockId { get; set; }
         public virtual Stock Stock { get; set; }
@@ -25,7 +31,7 @@ namespace SIDIMSLite.Api.Models
         public string Printing { get; set; }
         public string Others { get; set; }
         public string Status { get; set; }
-        public int? CardQuantity { get; set; }
+        public int CardQuantity { get; set; }
         public int? PreviousDelivery { get; set; }
         public string Batch { get; set; }
         public DateTime Date { get; set; }

@@ -21,8 +21,8 @@ namespace SIDIMSLite.Api.Utils
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
-
         }
+        
         public static TokenProviderOptions GetOptions()
         {
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.Config.GetSection("TokenAuthentication:SecretKey").Value));
@@ -37,7 +37,8 @@ namespace SIDIMSLite.Api.Utils
             };
         }
 
-        public static LoginResponseData Execute(ApplicationUser user, Client client, ApplicationDbContext db, RefreshToken refreshToken = null)
+        //ApplicationUser user, Client client, ApplicationDbContext db, RefreshToken refreshToken = null
+        public static LoginResponseData Execute(ApplicationUser user, ApplicationDbContext db, RefreshToken refreshToken = null)
         {
 
             var options = GetOptions();
@@ -120,7 +121,7 @@ namespace SIDIMSLite.Api.Utils
                 access_token = encodedJwt,
                 refresh_token = refreshToken.Token,
                 expires_in = (int)options.Expiration.TotalSeconds,
-                client_id = client.Id,
+                client_id = "ngAuthApp", //client.Id,
                 userName = user.UserName,
                 firstName = user.FirstName,
                 lastName = user.LastName,

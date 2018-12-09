@@ -20,7 +20,12 @@ import ConfirmEmail from "../Pages/account/confirmemail";
 import UpdateUser from "../Pages/admin/updateuser";
 import ForgotPassword from "../Pages/account/forgotpassword";
 import ManagerMIS from "../Pages/manager/mis";
+import NewStock from "../Pages/client/newstock";
 import ManagerMISDetail from "../Pages/manager/stocklist";
+import ManagerNewMISDetail from "../Pages/manager/new-stocklist";
+import ManagerWasteMISDetail from "../Pages/manager/waste-stocklist";
+import ManagerPersoMISDetail from "../Pages/manager/perso-stocklist";
+import StockStatus from "../Pages/client/stockstatus";
 
 class App extends Component {
   constructor(props, context) {
@@ -60,29 +65,6 @@ class App extends Component {
     this.props.history.push("/login");
   }
 
-  getClient() {
-    axios
-      .get("https://localhost:5001/api/clients")
-      .then(response => {
-        this.setState({ clients: response.data });
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
-  }
-
-  getProduct(clientId) {
-    axios
-      .get("https://localhost:5001/api/clients/" + clientId + "/products")
-      .then(response => {
-        console.log(response.data);
-        this.setState({ products: response.data });
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
-  }
-
   render() {
     const Client = Authorized(["client"]);
     const Invent = Authorized(["inventory"]);
@@ -90,10 +72,6 @@ class App extends Component {
 
     const relativePath = history.location.pathname;
     const contentWrapper = { padding: 0 };
-
-    {
-      this.getProducts;
-    }
 
     return (
       <Router history={history} {...this.state}>
@@ -153,11 +131,60 @@ class App extends Component {
                     component={Client(StockDetail)}
                   />
 
+                  <Route
+                    path="/issuance/:productId/:startDate/:endDate"
+                    exact
+                    component={Client(StockDetail)}
+                  />
+
+                  <Route
+                    path="/issuance/:productId"
+                    exact
+                    component={Client(StockDetail)}
+                  />
+
+                  <Route
+                    path="/new-stock/:productId/:startDate/:endDate"
+                    exact
+                    component={Client(NewStock)}
+                  />
+
+                  <Route
+                    path="/stock-status"
+                    exact
+                    component={Client(StockStatus)}
+                  />
+
                   <Route path="/manager" exact component={ManagerMIS} />
+
+                  <Route
+                    path="/manager/:clientId/:productId/new-stock/:startDate/:endDate"
+                    exact
+                    component={ManagerNewMISDetail}
+                  />
+
+                  <Route
+                    path="/manager/:clientId/:productId/waste/:startDate/:endDate"
+                    exact
+                    component={ManagerWasteMISDetail}
+                  />
+
+                  <Route
+                    path="/manager/:clientId/:productId/perso/:startDate/:endDate"
+                    exact
+                    component={ManagerMISDetail}
+                  />
+
                   <Route
                     path="/manager/:clientId/:id"
                     exact
                     component={ManagerMISDetail}
+                  />
+
+                  <Route
+                    path="/manager/issuance/:clientId/:productId/:startDate/:endDate"
+                    exact
+                    component={ManagerPersoMISDetail}
                   />
 
                   <Route

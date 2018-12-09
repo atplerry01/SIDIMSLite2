@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,12 @@ namespace SIDIMSLite.Api.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
+            var customeDate = "13/02/2018";
+
+            var date = DateTime.Now;
+
+            var start = DateTime.ParseExact(customeDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+
             return new string[] { "value1", "value2" };
         }
 

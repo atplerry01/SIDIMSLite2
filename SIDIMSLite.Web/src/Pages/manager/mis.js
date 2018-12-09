@@ -28,31 +28,23 @@ class ManagerMIS extends Component {
       clients: "",
       selectedClient: 5,
       startDate: moment().startOf("month"),
+      lastDate: "",
+      firstDate: "",
       endDate: moment()
     };
   }
 
+  componentDidMount() {
+    var start = moment(this.state.startDate._d).format("DD-MMM-YYYY");
+    var end = moment(this.state.endDate._d).format("DD-MMM-YYYY");
+
+    this.setState({ lastDate: end, firstDate: start });
+  }
+
   componentWillMount() {
-    var ls = localStorage.getItem("wss.auth");
-    var jwtToken = JSON.parse(ls);
-
-    //this.setState({ page: jwtToken.page, clientId: jwtToken.sidClientId });
-
     this.getClients(5);
     this.getAllClients();
     this.getClientVaults(5, "ThisMonth");
-
-    // if (jwtToken && jwtToken.page === "Client") {
-    //   this.setState({ page: jwtToken.page, clientId: jwtToken.sidClientId });
-
-    //   this.getClients(jwtToken.sidClientId);
-    //   this.getAllClients();
-    //   this.getClientVaults(jwtToken.sidClientId, "ThisMonth");
-    // } else {
-    //   localStorage.removeItem("wss.auth");
-    //   //   //window.location.reload();
-    //   //   //this.props.history.push("/login");
-    // }
   }
 
   onChange(e) {
@@ -61,7 +53,6 @@ class ManagerMIS extends Component {
 
     if (name === "selectedClient" && value !== null) {
       this.setState({ selectedClient: value });
-      console.log(value);
       this.getClientVaults(value);
     }
 
@@ -82,10 +73,10 @@ class ManagerMIS extends Component {
 
   onDateFilter() {
     const { startDate, endDate, selectedClient } = this.state;
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
-    console.log(selectedClient);
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
     this.getClientVaults(selectedClient, "DateRange", start, end);
+    this.setState({ lastDate: end, firstDate: start });
   }
 
   handleStartDateChange(date) {
@@ -100,10 +91,80 @@ class ManagerMIS extends Component {
     });
   }
 
-  handleNavigation = entity => {
-    console.log(entity);
-    console.log(this.state.selectedClient);
-  };
+  renderPersoStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    return (
+      <NavLink
+        to={
+          "/manager/" +
+          clientId +
+          "/" +
+          productId +
+          "/perso/" +
+          start +
+          "/" +
+          end
+        }
+      >
+        {entity}
+      </NavLink>
+    );
+  }
+
+  renderNewStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    return (
+      <NavLink
+        to={
+          "/manager/" +
+          clientId +
+          "/" +
+          productId +
+          "/new-stock/" +
+          start +
+          "/" +
+          end
+        }
+      >
+        {entity}
+      </NavLink>
+    );
+  }
+
+  renderWasteStock(entity, clientId, productId) {
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD-MMMM-YYYY");
+    var end = moment(endDate._d).format("DD-MMMM-YYYY");
+
+    if (entity === 0) return 0;
+    return (
+      <NavLink
+        to={
+          "/manager/issuance/" +
+          clientId +
+          "/" +
+          productId +
+          "/" +
+          start +
+          "/" +
+          end
+        }
+      >
+        {entity}
+      </NavLink>
+    );
+  }
 
   render() {
     const {
@@ -139,8 +200,8 @@ class ManagerMIS extends Component {
 
     let filteredStocks;
 
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
 
     if (clientVaults) {
       filteredStocks = clientVaults.filter(entity => {
@@ -149,25 +210,40 @@ class ManagerMIS extends Component {
     }
 
     const stockReportTable = () => {
-      console.log(clientVaults);
-
       if (clientVaults) {
         return filteredStocks.map((entity, index) => {
           return (
             <tr key={index}>
               <th scope="row">{index + 1}</th>
               <td>
-                <NavLink
-                  onClick={() => this.handleNavigation(entity)}
-                  to={"/manager/" + this.state.selectedClient + "/" + entity.id}
-                >
-                  {entity.product}
-                </NavLink>
+                {this.renderWasteStock(
+                  entity.product,
+                  this.state.selectedClient,
+                  entity.id
+                )}
               </td>
               <td>{entity.openingStock}</td>
-              <td>{entity.totalAddition}</td>
-              <td>{entity.totalWaste}</td>
-              <td>{entity.totalIssuance}</td>
+              <td>
+                {this.renderNewStock(
+                  entity.totalAddition,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
+              <td>
+                {this.renderWasteStock(
+                  entity.totalIssuance,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
+              <td>
+                {this.renderWasteStock(
+                  entity.totalWaste,
+                  this.state.selectedClient,
+                  entity.id
+                )}
+              </td>
               <td>{entity.closingBalance}</td>
               <td>{moment(entity.date).format("DD-MMM-YYYY")}</td>
             </tr>
@@ -183,7 +259,12 @@ class ManagerMIS extends Component {
             <div className="row">
               <div className="col-lg-12" ref={el => (this.componentRef = el)}>
                 <header>
-                  <h2>Stock Status</h2>
+                  <h2 style={{ color: "blue" }}>
+                    Stock Report as at {this.state.lastDate}
+                  </h2>
+                  <h2 style={{ fontSize: 20 }}>
+                    from {this.state.firstDate} to {this.state.lastDate}
+                  </h2>
                 </header>
 
                 <div className="row">
@@ -208,6 +289,7 @@ class ManagerMIS extends Component {
                               onChange={this.handleStartDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -220,6 +302,7 @@ class ManagerMIS extends Component {
                               onChange={this.handleEndDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -227,7 +310,7 @@ class ManagerMIS extends Component {
                           <div className="col-lg-4">
                             <input
                               type="submit"
-                              value="Filter"
+                              value="Query"
                               className="btn btn-primary"
                               onClick={this.onDateFilter}
                             />
@@ -251,8 +334,8 @@ class ManagerMIS extends Component {
                           <th scope="col">Description</th>
                           <th scope="col">Opening Stock</th>
                           <th>New Stock</th>
-                          <th>Waste</th>
                           <th>Personalization</th>
+                          <th>Waste</th>
                           <th scope="col">Closing Stock</th>
                           <th>Last Updated</th>
                         </tr>
@@ -282,7 +365,6 @@ class ManagerMIS extends Component {
     axios
       .get(myConfig.apiUrl + "/api/clients")
       .then(response => {
-        console.log(response.data);
         this.setState({ clients: response.data });
       })
       .catch(function(error) {});
@@ -311,12 +393,9 @@ class ManagerMIS extends Component {
           endDate
       )
       .then(response => {
-        console.log(response.data);
         this.setState({ clientVaults: response.data });
       })
-      .catch(function(error) {
-        console.log(error);
-      });
+      .catch(function(error) {});
   }
 
   getProductStockList(clientId, productId) {
@@ -325,7 +404,6 @@ class ManagerMIS extends Component {
         myConfig.apiUrl + "/api/clients/" + clientId + "/ProductStockSummary"
       )
       .then(response => {
-        console.log(response.data);
         this.setState({ stockReports: response.data });
       })
       .catch(function(error) {});

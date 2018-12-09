@@ -115,7 +115,8 @@ namespace SIDIMSLite.Api.Providers
             }
 
             var user = refreshTokenModel.User;
-            var token = GetLoginToken.Execute(user, client, db, refreshTokenModel);
+            //user, client, db, refreshTokenModel
+            var token = GetLoginToken.Execute(user, db, refreshTokenModel);
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(JsonConvert.SerializeObject(token, _serializerSettings));
         }

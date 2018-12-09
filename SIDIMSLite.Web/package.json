@@ -8,6 +8,7 @@
     "axios": "^0.18.0",
     "bootstrap": "3.3.6",
     "bootstrap-daterangepicker": "^3.0.3",
+    "file-loader": "^2.0.0",
     "font-awesome": "4.7.0",
     "graphql": "^0.13.2",
     "graphql-anywhere": "^4.1.14",
@@ -34,5 +35,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "uglify-js-brunch": "^2.10.0"
   }
 }

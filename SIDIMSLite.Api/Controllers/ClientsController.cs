@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -34,7 +35,7 @@ namespace SIDIMSLite.Api.Controllers
         [HttpGet("{clientId}/products")]
         public async Task<IEnumerable<StockModel>> GetClientStocks(int clientId)
         {
-            var products = await context.Stock.Where(p => p.ClientId == clientId).ToListAsync();
+            var products = await context.Stock.Where(p => p.ClientId == clientId && p.CategoryId == 1).ToListAsync();
             return mapper.Map<IEnumerable<Stock>, IEnumerable<StockModel>>(products);
         }
 
@@ -88,6 +89,10 @@ namespace SIDIMSLite.Api.Controllers
         [HttpGet("{clientId}/vaults")]
         public async Task<IEnumerable<VaultModel>> GetClientVaults(int clientId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
         {
+
+            var startDateStr = "";
+            var endDateStr = "";
+
             DateTime start = new DateTime();
             DateTime end = new DateTime();
 
@@ -96,10 +101,11 @@ namespace SIDIMSLite.Api.Controllers
 
             if (rangeType == "ThisMonth")
             {
-                first = 1;
-                last = 30;
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
 
                 var raw1 = year + "-" + month + "-" + first;
                 var raw2 = year + "-" + month + "-" + last;
@@ -125,8 +131,19 @@ namespace SIDIMSLite.Api.Controllers
             }
             else if (rangeType == "DateRange")
             {
-                start = DateTime.Parse(startDate);
-                end = DateTime.Parse(endDate);
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.ParseExact(stockStartDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -150,6 +167,308 @@ namespace SIDIMSLite.Api.Controllers
         [HttpGet("{productId}/stockreports")]
         public async Task<IEnumerable<StockReportModel>> GetClientStockReports(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
         {
+            var startDateStr = "";
+            var endDateStr = "";
+
+
+            DateTime start = new DateTime();
+            DateTime end = new DateTime();
+
+            int first, last = new int();
+            int month, year = new int();
+
+            if (rangeType == "ThisMonth")
+            {
+                month = DateTime.Now.Month;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "LastMonth")
+            {
+                month = DateTime.Now.Month - 1;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "DateRange")
+            {
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                start = DateTime.Now;
+                end = DateTime.Now;
+            }
+
+            var vaults = await context.Mis.Include(o => o.Operation).Where(p => p.StockId == productId && (p.Date >= start && p.Date <= end)).ToListAsync();
+            return mapper.Map<IEnumerable<Mis>, IEnumerable<StockReportModel>>(vaults);
+        }
+
+        [HttpGet("{productId}/IssuanceStockReports")]
+        public async Task<IEnumerable<StockConsumptionReportModel>> GetIssuanceStockReports(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
+        {
+
+            var startDateStr = "";
+            var endDateStr = "";
+
+            DateTime start = new DateTime();
+            DateTime end = new DateTime();
+
+            int first, last = new int();
+            int month, year = new int();
+
+            if (rangeType == "ThisMonth")
+            {
+                month = DateTime.Now.Month;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "LastMonth")
+            {
+                month = DateTime.Now.Month - 1;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "DateRange")
+            {
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+
+            var vaults = await context.Mis.Include(o => o.Operation).Where(p => p.StockId == productId && p.Operation.Operation == "Issuance" && (p.Date >= start && p.Date <= end)).ToListAsync();
+            //var distincts = vaults.GroupBy(g => g.FileName).Select(s => s.First());
+            var vaultModels = mapper.Map<IEnumerable<Mis>, IEnumerable<StockConsumptionReportModel>>(vaults);
+
+            foreach (var item in vaultModels)
+            {
+                item.IssuanceQuantity = GetJobIssuances(item.FileName, start, end);
+                item.WasteQuantity = GetJobWastes(item.FileName, start, end);
+                var lastedDate = GetLastUpdate(item.Id);
+            }
+
+            return vaultModels;
+        }
+
+        [HttpGet("{productId}/PersoStockReports")]
+        public async Task<IEnumerable<StockReportModel>> GetPersoStockReports(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
+        {
+            var startDateStr = "";
+            var endDateStr = "";
+
+            DateTime start = new DateTime();
+            DateTime end = new DateTime();
+
+            int first, last = new int();
+            int month, year = new int();
+
+            if (rangeType == "ThisMonth")
+            {
+                month = DateTime.Now.Month;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "LastMonth")
+            {
+                month = DateTime.Now.Month - 1;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "DateRange")
+            {
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.Parse(startDate);
+                end = stockEndDate; //DateTime.Parse(endDate);
+            }
+            else
+            {
+                start = DateTime.Now;
+                end = DateTime.Now;
+            }
+
+            var vaults = await context.Mis.Include(o => o.Operation).Where(p => p.StockId == productId && p.Operation.Operation == "Issuance" && (p.Date >= start && p.Date <= end)).OrderByDescending(o => o.Id).ToListAsync();
+            return mapper.Map<IEnumerable<Mis>, IEnumerable<StockReportModel>>(vaults);
+        }
+
+
+        private int GetJobIssuances(string fileName, DateTime start, DateTime end)
+        {
+            //&& (a.Date >= start && a.Date <= end)
+            return context.Mis.Where(a => a.FileName == fileName && a.Operation.Operation == "Issuance").Select(s => s.CardQuantity).Sum();
+        }
+
+        private int GetJobWastes(string fileName, DateTime start, DateTime end)
+        {
+            //&& (a.Date >= start && a.Date <= end)
+            return context.Mis.Where(a => a.FileName == fileName && a.Operation.Operation == "Waste").Select(s => s.CardQuantity).Sum();
+        }
+
+        [HttpGet("{productId}/WasteStockReports")]
+        public async Task<IEnumerable<StockConsumptionReportModel>> GetWasteStockReports(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
+        {
+
+            var startDateStr = "";
+            var endDateStr = "";
+
+            DateTime start = new DateTime();
+            DateTime end = new DateTime();
+
+            int first, last = new int();
+            int month, year = new int();
+
+            if (rangeType == "ThisMonth")
+            {
+
+                month = DateTime.Now.Month;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "LastMonth")
+            {
+                month = DateTime.Now.Month - 1;
+                year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
+
+                var raw1 = year + "-" + month + "-" + first;
+                var raw2 = year + "-" + month + "-" + last;
+
+                start = DateTime.Parse(raw1);
+                end = DateTime.Parse(raw2);
+
+            }
+            else if (rangeType == "DateRange")
+            {
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                start = DateTime.Now;
+                end = DateTime.Now;
+            }
+
+            var vaults = await context.Mis.Include(o => o.Operation)
+                .Where(p => p.StockId == productId && p.Operation.Operation == "Waste" && (p.Date >= start && p.Date <= end)).OrderByDescending(o => o.Id).ToListAsync();
+
+            return mapper.Map<IEnumerable<Mis>, IEnumerable<StockConsumptionReportModel>>(vaults);
+
+        }
+
+        [HttpGet("{productId}/NewStockReports")]
+        public async Task<IEnumerable<StockConsumptionReportModel>> GetNewStockReports(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
+        {
+            var startDateStr = "";
+            var endDateStr = "";
+
+
+
             DateTime start = new DateTime();
             DateTime end = new DateTime();
 
@@ -187,8 +506,20 @@ namespace SIDIMSLite.Api.Controllers
             }
             else if (rangeType == "DateRange")
             {
-                start = DateTime.Parse(startDate);
-                end = DateTime.Parse(endDate);
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -196,14 +527,21 @@ namespace SIDIMSLite.Api.Controllers
                 end = DateTime.Now;
             }
 
-            var vaults = await context.Mis.Include(o => o.Operation).Where(p => p.StockId == productId && (p.Date >= start && p.Date <= end)).OrderByDescending(o => o.Id).ToListAsync();
-            return mapper.Map<IEnumerable<Mis>, IEnumerable<StockReportModel>>(vaults);
+            var vaults = await context.Mis.Include(o => o.Operation)
+                .Where(p => p.StockId == productId && p.Operation.Operation == "New Stock" && (p.Date >= start && p.Date <= end)).OrderByDescending(o => o.Id).ToListAsync();
+
+            return mapper.Map<IEnumerable<Mis>, IEnumerable<StockConsumptionReportModel>>(vaults);
         }
+
 
         [HttpGet("{productId}/summary")]
         public async Task<IActionResult> GetClientStockSummary(int productId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
         {
 
+            var startDateStr = "";
+            var endDateStr = "";
+
+
             DateTime start = new DateTime();
             DateTime end = new DateTime();
 
@@ -212,10 +550,12 @@ namespace SIDIMSLite.Api.Controllers
 
             if (rangeType == "ThisMonth")
             {
-                first = 1;
-                last = 30;
+
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
 
                 var raw1 = year + "-" + month + "-" + first;
                 var raw2 = year + "-" + month + "-" + last;
@@ -241,8 +581,18 @@ namespace SIDIMSLite.Api.Controllers
             }
             else if (rangeType == "DateRange")
             {
-                start = DateTime.Parse(startDate);
-                end = DateTime.Parse(endDate);
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -250,8 +600,8 @@ namespace SIDIMSLite.Api.Controllers
                 end = DateTime.Now;
             }
 
-            var vaults = await context.Mis.Where(p => p.StockId == productId && (p.Date >= start && p.Date <= end)).ToListAsync();
-            var query = vaults.Sum(x => x.CardQuantity); //Todo: Must not be null
+            var vaults = await context.Mis.Where(p => p.StockId == productId && (p.Operation.Operation == "Waste" || p.Operation.Operation == "Issuance") && (p.Date >= start && p.Date <= end)).ToListAsync();
+            var query = vaults.Sum(x => x.CardQuantity);
             var vaultCount = context.Mis.Where(p => p.StockId == productId).LastOrDefault();
 
             var StockSummaryResource = new StockSummaryResource()
@@ -266,8 +616,12 @@ namespace SIDIMSLite.Api.Controllers
 
 
         [HttpGet("{clientId}/ProductStockSummary")]
-        public async Task<IEnumerable<StockVaultModel>> GetClientTestVaults(int clientId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
+        public async Task<IEnumerable<StockVaultModel>> GetClientProductVaults(int clientId, string rangeType, [FromQuery]string startDate, [FromQuery]string endDate)
         {
+
+            var startDateStr = "";
+            var endDateStr = "";
+
             DateTime start = new DateTime();
             DateTime end = new DateTime();
 
@@ -276,10 +630,12 @@ namespace SIDIMSLite.Api.Controllers
 
             if (rangeType == "ThisMonth")
             {
-                first = 1;
-                last = 30; //Todo: Fix for Leap year
+
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
+
+                first = 1;
+                last = DateTime.DaysInMonth(year, month);
 
                 var raw1 = year + "-" + month + "-" + first;
                 var raw2 = year + "-" + month + "-" + last;
@@ -305,12 +661,22 @@ namespace SIDIMSLite.Api.Controllers
             }
             else if (rangeType == "DateRange")
             {
-                start = DateTime.Parse(startDate);
-                end = DateTime.Parse(endDate);
+
+                System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-GB");
+                startDateStr = Convert.ToDateTime(startDate, ci.DateTimeFormat).ToString("d");//short date pattern
+                endDateStr = Convert.ToDateTime(endDate, ci.DateTimeFormat).ToString("d");//short date pattern
+
+                var startTime = TimeSpan.Parse("00:00:00");
+                var endTime = TimeSpan.Parse("23:59:59");
+
+                DateTime stockStartDate = Convert.ToDateTime(startDateStr) + startTime;
+                DateTime stockEndDate = Convert.ToDateTime(endDateStr) + endTime;
+
+                start = stockStartDate; //DateTime.ParseExact(startDate, "dd/MM/yyyy: ", CultureInfo.InvariantCulture);
+                end = stockEndDate; //DateTime.ParseExact(endDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             }
             else
             {
-
                 month = DateTime.Now.Month;
                 year = DateTime.Now.Year;
 
@@ -322,10 +688,9 @@ namespace SIDIMSLite.Api.Controllers
 
                 start = DateTime.Parse(raw1);
                 end = DateTime.Parse(raw2);
-
             }
 
-            var products = await context.Stock.Where(c => c.ClientId == clientId).OrderByDescending(o => o.Id).ToListAsync();
+            var products = await context.Stock.Where(c => c.ClientId == clientId && c.CategoryId == 1).OrderByDescending(o => o.Id).ToListAsync();
             var productModel = mapper.Map<IEnumerable<Stock>, IEnumerable<StockVaultModel>>(products);
 
             foreach (var item in productModel)
@@ -344,7 +709,7 @@ namespace SIDIMSLite.Api.Controllers
                 {
                     item.Date = Convert.ToDateTime(lastedDate);
                 }
-                //item.Date = GetLastUpdate(item.Id);
+                //     //item.Date = GetLastUpdate(item.Id);
             }
 
             return productModel;
@@ -366,6 +731,7 @@ namespace SIDIMSLite.Api.Controllers
 
             return lastUpdate;
         }
+
         private int GetOpeningStock(int productId, DateTime start, DateTime end)
         {
             var balance = 0;
@@ -417,6 +783,7 @@ namespace SIDIMSLite.Api.Controllers
 
         private int GetAdditions(int productId, DateTime start, DateTime end)
         {
+
             return context.Operations.Where(a => a.StockId == productId && a.Operation == "New Stock" && (a.Date >= start && a.Date <= end)).Select(s => s.Quantity).Sum();
         }
 

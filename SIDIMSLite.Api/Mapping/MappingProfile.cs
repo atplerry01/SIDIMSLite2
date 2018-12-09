@@ -16,6 +16,7 @@ namespace SIDIMSLite.Api.Mapping
             CreateMap<Mis, VaultModel>();
             CreateMap<Mis, MisVaultModel>();
             CreateMap<Mis, StockReportModel>();
+            CreateMap<Mis, StockConsumptionReportModel>();
             CreateMap<Clients, ClientModel>();
 
             CreateMap<ApplicationUser, ApplicationUserModel>();

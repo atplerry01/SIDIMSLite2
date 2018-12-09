@@ -165,7 +165,7 @@ namespace SIDIMSLite.Api.Controllers
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    From = new MailAddress("sidims@secureidltd.com"),
                     Subject = subject,
                     IsBodyHtml = true,
                     Body = messageBody
@@ -175,9 +175,9 @@ namespace SIDIMSLite.Api.Controllers
 
                 var smtpClient = new SmtpClient
                 {
-                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Credentials = new NetworkCredential("sidims@secureidltd.com", "Secure123"),
                     Host = "smtp.secureidltd.com",
-                    Port = 587
+                    Port = 25 //587
                 };
 
                 smtpClient.Send(mailMessage);
@@ -267,7 +267,7 @@ namespace SIDIMSLite.Api.Controllers
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress("lakinsanya@secureidltd.com"),
+                    From = new MailAddress("sidims@secureidltd.com"),
                     Subject = subject,
                     IsBodyHtml = true,
                     Body = messageBody
@@ -277,9 +277,9 @@ namespace SIDIMSLite.Api.Controllers
 
                 var smtpClient = new SmtpClient
                 {
-                    Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                    Credentials = new NetworkCredential("sidims@secureidltd.com", "Secure123"),
                     Host = "smtp.secureidltd.com",
-                    Port = 587
+                    Port = 25 //587
                 };
 
                 smtpClient.Send(mailMessage);
@@ -355,6 +355,7 @@ namespace SIDIMSLite.Api.Controllers
 
             var user = await userManager.FindByNameAsync(model.UserId);
 
+            //Todo: Verify the old password before generating new password
             // Verify the Old Password
             var identity = await userManager.CheckPasswordAsync(user, model.OldPassword); //GetClaimsIdentity(user.UserName, model.OldPassword);
 
@@ -366,20 +367,23 @@ namespace SIDIMSLite.Api.Controllers
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
 
+            var clientUser = await context.ClientUsers.SingleOrDefaultAsync(u => u.UserId == user.Id);
+
+            //Todo: Admin and RM Cannot change password
             if (result.Succeeded)
             {
                 // Update Client User
-                var clientUser = await context.ClientUsers
-                    .SingleOrDefaultAsync(u => u.UserId == user.Id);
+                if (clientUser != null)
+                {
+                    clientUser.ChangePassword = true;
 
-                clientUser.ChangePassword = true;
+                    if (clientUser == null) return NotFound();
 
-                if (clientUser == null) return NotFound();
+                    context.Entry(clientUser).State = EntityState.Modified;
+                    await context.SaveChangesAsync();
 
-                context.Entry(clientUser).State = EntityState.Modified;
-                await context.SaveChangesAsync();
-
-                return Ok(clientUser);
+                    return Ok(clientUser);
+                }
             }
             else
             {
@@ -387,7 +391,7 @@ namespace SIDIMSLite.Api.Controllers
                 //return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError);
             }
 
-            //return Ok();
+            return Ok();
             //return Ok(clientUser); //Content("Success", "text/html");
         }
 
@@ -407,18 +411,17 @@ namespace SIDIMSLite.Api.Controllers
             var result = await userManager.ResetPasswordAsync(user, token, randomPassword);
 
             // Update Client User
-            var clientUser = await context.ClientUsers
-                .SingleOrDefaultAsync(u => u.UserId == user.Id);
+            var clientUser = await context.ClientUsers.SingleOrDefaultAsync(u => u.UserId == user.Id);
 
-            clientUser.ChangePassword = false;
-
-            if (clientUser == null)
+            if (clientUser != null)
             {
+                clientUser.ChangePassword = false;
 
-            } //return NotFound();
+                context.Entry(clientUser).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+            }
+            //return NotFound();
 
-            context.Entry(clientUser).State = EntityState.Modified;
-            await context.SaveChangesAsync();
 
             #region EmailSender
 
@@ -466,7 +469,7 @@ namespace SIDIMSLite.Api.Controllers
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress("lakinsanya@secureidltd.com"),
+                From = new MailAddress("sidims@secureidltd.com"),
                 Subject = subject,
                 IsBodyHtml = true,
                 Body = messageBody
@@ -476,9 +479,9 @@ namespace SIDIMSLite.Api.Controllers
 
             var smtpClient = new SmtpClient
             {
-                Credentials = new NetworkCredential("lakinsanya@secureidltd.com", "Whycespace@01"),
+                Credentials = new NetworkCredential("sidims@secureidltd.com", "Secure123"),
                 Host = "smtp.secureidltd.com",
-                Port = 587
+                Port = 25 //587
             };
 
             smtpClient.Send(mailMessage);

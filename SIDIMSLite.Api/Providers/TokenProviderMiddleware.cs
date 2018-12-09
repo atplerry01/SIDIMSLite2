@@ -52,37 +52,38 @@ namespace SIDIMSLite.Api.Providers
             try
             {
                 var db = context.RequestServices.GetService<ApplicationDbContext>();
-
+                
                 string clientId = string.Empty;
-                Client client = null;
+                //Client client = null;
 
                 var username = context.Request.Form["username"].ToString();
                 var password = context.Request.Form["password"];
-                clientId = context.Request.Form["client_Id"].ToString();
+                //clientId = context.Request.Form["client_Id"].ToString();
 
-                if (clientId == null || clientId == "")
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("invalid_clientId, ClientId should be sent.");
-                    return;
-                }
+                // if (clientId == null || clientId == "")
+                // {
+                //     context.Response.StatusCode = 400;
+                //     await context.Response.WriteAsync("invalid_clientId, ClientId should be sent.");
+                //     return;
+                // }
 
-                //Find Client
-                client = db.Clients.Find(clientId);
+                // //Find Client
+                // client = db.Clients.Find(clientId);
+                
 
-                if (client == null)
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("invalid_clientId, Client is not registered in the system.");
-                    return;
-                }
+                // if (client == null)
+                // {
+                //     context.Response.StatusCode = 400;
+                //     await context.Response.WriteAsync("invalid_clientId, Client is not registered in the system.");
+                //     return;
+                // }
 
-                if (!client.Active)
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("invalid_clientId, Client is inactive.");
-                    return;
-                }
+                // if (!client.Active)
+                // {
+                //     context.Response.StatusCode = 400;
+                //     await context.Response.WriteAsync("invalid_clientId, Client is inactive.");
+                //     return;
+                // }
 
 
                 var signInManager = context.RequestServices.GetService<SignInManager<ApplicationUser>>();
@@ -106,7 +107,8 @@ namespace SIDIMSLite.Api.Providers
                     return;
                 }
 
-                var response = GetLoginToken.Execute(user, client, db);
+                //user, client, db
+                var response = GetLoginToken.Execute(user, db);
 
                 // Serialize and return the response
                 context.Response.ContentType = "application/json";

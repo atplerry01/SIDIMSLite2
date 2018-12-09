@@ -33,7 +33,9 @@ class Inventory extends Component {
       clientId: "",
       dateRange: "",
       stockLogModalShow: false,
-      stockLogs: ""
+      stockLogs: "",
+      firstDate: "",
+      lastDate: ""
     };
   }
 
@@ -52,6 +54,27 @@ class Inventory extends Component {
     this.setState({ stockLogModalShow: true });
   }
 
+  componentDidMount() {
+    const {
+      match: { params }
+    } = this.props;
+
+    var first = moment(params.startDate).format("DD/MM/YYYY");
+    var last = moment(params.endDate).format("DD/MM/YYYY");
+
+    const { startDate, endDate } = this.state;
+
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
+
+    this.getProductStockList(params.productId, "DateRange", start, end);
+    this.getProductStockSummary(params.productId, "DateRange", start, end);
+
+    var first = moment(params.startDate).format("DD/MM/YYYY");
+
+    //this.setState({ startDate: first, lastDate: last });
+  }
+
   componentWillMount() {
     const {
       match: { params }
@@ -61,11 +84,14 @@ class Inventory extends Component {
     var jwtToken = JSON.parse(ls);
 
     if (params && jwtToken.sidClientId) {
-      this.getProductById(params.id);
+      this.getProductById(params.productId);
       this.getClientProducts(jwtToken.sidClientId);
-      this.getProductStockList(params.id, "ThisMonth");
-      this.getProductStockSummary(params.id, "ThisMonth");
-      this.setState({ selectedProductId: params.id });
+      this.getProductStockList(params.productId, "ThisMonth");
+      this.getProductStockSummary(params.productId, "ThisMonth");
+      this.setState({
+        clientId: jwtToken.sidClientId,
+        selectedProductId: params.productId
+      });
     }
   }
 
@@ -73,38 +99,32 @@ class Inventory extends Component {
     const {
       match: { params }
     } = this.props;
-    this.getProductStockList(params.id, "LastMonth");
-    this.getProductStockSummary(params.id, "LastMonth");
+    this.getProductStockList(params.productId, "LastMonth");
+    this.getProductStockSummary(params.productId, "LastMonth");
   }
 
   onDateFilter() {
     const {
       match: { params }
     } = this.props;
-    const { startDate, endDate, stockReports } = this.state;
+    const { startDate, endDate } = this.state;
 
-    var start = moment(startDate._d).format("L");
-    var end = moment(endDate._d).format("L");
+    var start = moment(startDate._d).format("DD/MM/YYYY");
+    var end = moment(endDate._d).format("DD/MM/YYYY");
 
-    this.getProductStockList(params.id, "DateRange", start, end);
-    this.getProductStockSummary(params.id, "DateRange", start, end);
+    this.getProductStockList(params.productId, "DateRange", start, end);
+    this.getProductStockSummary(params.productId, "DateRange", start, end);
+
+    this.setState({ firstDate: start, lastDate: end });
   }
 
   handleStartDateChange(date) {
-    // if (this.state.filterChange == true) {
-    //   this.getProductStockList(this.state.selectedProductId);
-    // }
-
     this.setState({
       startDate: date
     });
   }
 
   handleEndDateChange(date) {
-    // if (this.state.filterChange == true) {
-    //   this.getProductStockList(this.state.selectedProductId);
-    // }
-
     this.setState({
       endDate: date
     });
@@ -131,7 +151,7 @@ class Inventory extends Component {
     if (name === "productId") {
       this.getProductById(value);
       this.getProductStockList(value);
-      //this.getProductStockSummary(params.id);
+      //this.getProductStockSummary(params.productId);
     }
   }
 
@@ -151,18 +171,28 @@ class Inventory extends Component {
     const stockSummaryDiv = () => {
       const { startDate, endDate } = this.state;
 
-      var start = moment(startDate._d).format("DD/MM/YYYY");
-      var end = moment(endDate._d).format("DD/MM/YYYY");
-
-      console.log(start, end);
+      var start = moment(startDate._d).format("DD-MMM-YYYY");
+      var end = moment(endDate._d).format("DD-MMM-YYYY");
 
       if (stockSummary) {
         return (
           <div>
-            <h3>Summary</h3>
-            <div>Current Stock: {stockSummary.currentStock}</div>
+            <h2 style={{ fontSize: 22 }}>
+              Summary (This view provides information on Card Consumption -
+              Issuance + Waste - For a specific date Or the date range selected
+              by you).
+            </h2>
+
             <div>
-              Total Consumption: {stockSummary.stockCount} ({start} - {end})
+              <h2 style={{ color: "blue" }}>
+                Current Stock: {stockSummary.currentStock} Cards
+              </h2>
+            </div>
+            <div>
+              <h2 style={{ color: "blue", fontSize: 22 }}>
+                Consumption: {stockSummary.stockCount} Cards; From:
+                {start} - To: {end}
+              </h2>
             </div>
           </div>
         );
@@ -174,7 +204,7 @@ class Inventory extends Component {
         return this.state.products.map((prod, index) => {
           return (
             <li key={prod.id}>
-              <NavLink to={"/mis/" + prod.id}>{prod.product}</NavLink>
+              <NavLink to={"/issuance/" + prod.id}>{prod.product}</NavLink>
             </li>
           );
         });
@@ -187,16 +217,14 @@ class Inventory extends Component {
           return (
             <tr key={index}>
               <th scope="row">{index + 1}</th>
-              <td>{stock.fileName}</td>
-              <td>{stock.openingStock}</td>
-              <td>{stock.operation.operation}</td>
-              <td>{stock.cardQuantity}</td>
-              <td>{stock.closingBalance}</td>
               <td>
                 <span style={{ fontSize: "8" }}>
                   {moment(stock.date).format("DD-MMM-YYYY")}
                 </span>
               </td>
+              <td>{stock.fileName}</td>
+              <td>{stock.issuanceQuantity}</td>
+              <td>{stock.wasteQuantity}</td>
             </tr>
           );
         });
@@ -258,6 +286,11 @@ class Inventory extends Component {
               />
 
               <div className="">
+                <div className="">
+                  <h2 style={{ fontSize: 20 }}>
+                    <NavLink to="/">Back to Stock Report</NavLink>
+                  </h2>
+                </div>
                 <ReactToPrint
                   trigger={() => (
                     <a href="#">
@@ -295,7 +328,7 @@ class Inventory extends Component {
                           placeholder=" Search Job Remark"
                         />
                       </div>
-                      <div className="col-lg-4 pull-right">
+                      <div className="col-lg-7 pull-right">
                         <div className="row">
                           <div className="col-lg-4">
                             <DatePicker
@@ -304,6 +337,7 @@ class Inventory extends Component {
                               onChange={this.handleStartDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -316,6 +350,7 @@ class Inventory extends Component {
                               onChange={this.handleEndDateChange}
                               showYearDropdown
                               dateFormatCalendar="MMMM"
+                              dateFormat="DD-MMM-YYYY"
                               scrollableYearDropdown
                               yearDropdownItemNumber={3}
                             />
@@ -323,7 +358,7 @@ class Inventory extends Component {
                           <div className="col-lg-4">
                             <input
                               type="submit"
-                              value="Filter"
+                              value="Query"
                               className="btn btn-primary"
                               onClick={this.onDateFilter}
                             />
@@ -342,12 +377,10 @@ class Inventory extends Component {
                       <thead>
                         <tr>
                           <th scope="col">#</th>
-                          <th scope="col">Description</th>
-                          <th scope="col">Opening Stock</th>
-                          <th scope="col">Operation</th>
-                          <th scope="col">Quantity</th>
-                          <th scope="col">Current Stock</th>
-                          <th>Date</th>
+                          <th>Last Updated</th>
+                          <th scope="col">JobName</th>
+                          <th scope="col">Issuance</th>
+                          <th scope="col">Waste</th>
                         </tr>
                       </thead>
                       <tbody>{stockReportTable()}</tbody>
@@ -369,7 +402,6 @@ class Inventory extends Component {
                     <th scope="col">#</th>
                     <th scope="col">Issuance Desc</th>
                     <th scope="col">Quantity</th>
-                    <th scope="col">Current Stock</th>
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -400,7 +432,9 @@ class Inventory extends Component {
       .then(response => {
         this.setState({ products: response.data });
       })
-      .catch(function(error) {});
+      .catch(function(error) {
+        //console.log(error);
+      });
   }
 
   getClientVaults(productId) {
@@ -412,13 +446,14 @@ class Inventory extends Component {
       .catch(function(error) {});
   }
 
+  //stockreports
   getProductStockList(productId, rangeType, startDate, endDate) {
     axios
       .get(
         myConfig.apiUrl +
           "/api/clients/" +
           productId +
-          "/stockreports?rangeType=" +
+          "/IssuanceStockReports?rangeType=" +
           rangeType +
           "&startDate=" +
           startDate +
@@ -426,10 +461,12 @@ class Inventory extends Component {
           endDate
       )
       .then(response => {
-        console.log(response.data);
+        //console.log(response.data);
         this.setState({ stockReports: response.data });
       })
-      .catch(function(error) {});
+      .catch(function(error) {
+        console.log(error);
+      });
   }
 
   getProductStockSummary(productId, rangeType, startDate, endDate) {
